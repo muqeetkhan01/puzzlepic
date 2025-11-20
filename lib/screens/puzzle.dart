@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -114,8 +116,11 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
                         ? Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.image_outlined,
-                                  size: 10.h, color: AppColors.white70),
+                              Icon(
+                                Icons.image_outlined,
+                                size: 10.h,
+                                color: AppColors.white70,
+                              ),
                               SizedBox(height: 2.h),
                               Text(
                                 "Drag and drop your\nimage here\n\nor click to browse",
@@ -128,6 +133,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
                             ],
                           )
                         : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(15),
@@ -259,13 +265,17 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen> {
 
         canvas.drawImageRect(
           fullImage!,
-          Rect.fromLTWH(c * w.toDouble(), r * h.toDouble(), w.toDouble(), h.toDouble()),
+          Rect.fromLTWH(
+            c * w.toDouble(),
+            r * h.toDouble(),
+            w.toDouble(),
+            h.toDouble(),
+          ),
           Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble()),
           paint,
         );
 
-        final tileImage =
-            await recorder.endRecording().toImage(w, h);
+        final tileImage = await recorder.endRecording().toImage(w, h);
 
         tiles.add(tileImage);
       }
@@ -286,137 +296,140 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen> {
   }
 
   void _checkWin() {
-  for (int i = 0; i < tileOrder.length; i++) {
-    if (tileOrder[i] != i) return;
-  }
+    for (int i = 0; i < tileOrder.length; i++) {
+      if (tileOrder[i] != i) return;
+    }
 
-  timer?.cancel();
+    timer?.cancel();
 
-  showGeneralDialog(
-    context: context,
-    barrierDismissible: false,
-    barrierLabel: "",
-    transitionDuration: const Duration(milliseconds: 280),
-    pageBuilder: (context, anim1, anim2) {
-      return Stack(
-        children: [
-          // 🎉 CONFETTI (Behind Popup)
-          Positioned.fill(
-            child: IgnorePointer(
-              child: Lottie.asset(
-                "assets/animation/Confetti.json",
-                fit: BoxFit.cover,
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: "",
+      transitionDuration: const Duration(milliseconds: 280),
+      pageBuilder: (context, anim1, anim2) {
+        return Stack(
+          children: [
+            // 🎉 CONFETTI (Behind Popup)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Lottie.asset(
+                  "assets/animation/Confetti.json",
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
 
-          // 🎯 MODERN POPUP (with underline-disabled media query)
-          Center(
-            child: MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                boldText: false,
-                highContrast: false,
-                accessibleNavigation: false,
-              ),
+            // 🎯 MODERN POPUP (with underline-disabled media query)
+            Center(
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  boldText: false,
+                  highContrast: false,
+                  accessibleNavigation: false,
+                ),
 
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(30),
-                child: BackdropFilter(
-                  filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8), // reduced blur
-                  child: Container(
-                    width: 80.w,
-                    padding:
-                        EdgeInsets.symmetric(vertical: 4.h, horizontal: 5.w),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(
-                          color: Colors.white.withOpacity(0.22), width: 1.2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.20),
-                          blurRadius: 20,
-                          offset: const Offset(0, 15),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(30),
+                  child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(
+                      sigmaX: 8,
+                      sigmaY: 8,
+                    ), // reduced blur
+                    child: Container(
+                      width: 80.w,
+                      padding: EdgeInsets.symmetric(
+                        vertical: 4.h,
+                        horizontal: 5.w,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.22),
+                          width: 1.2,
                         ),
-                      ],
-                    ),
-
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // 🎉 Emoji
-                        Text(
-                          "🎉",
-                          style: TextStyle(fontSize: 38.sp),
-                        ),
-                        SizedBox(height: 1.2.h),
-
-                        // 🏆 Title
-                        Text(
-                          "Puzzle Completed!",
-                          style: GoogleFonts.poppins(
-                            fontSize: 21.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.20),
+                            blurRadius: 20,
+                            offset: const Offset(0, 15),
                           ),
-                        ),
+                        ],
+                      ),
 
-                        SizedBox(height: 1.h),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // 🎉 Emoji
+                          Text("🎉", style: TextStyle(fontSize: 38.sp)),
+                          SizedBox(height: 1.2.h),
 
-                        // ⏱ Time
-                        Text(
-                          "Time: $seconds seconds",
-                          style: GoogleFonts.poppins(
-                            fontSize: 17.sp,
-                            color: Colors.white70,
-                          ),
-                        ),
-
-                        SizedBox(height: 3.h),
-
-                        // ✔ Continue Button
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigator.pop(context);
-                          },
-                          child: Container(
-                            height: 6.h,
-                            width: 40.w,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xFFA855F7),
-                                  Color(0xFF9333EA),
-                                ],
-                              ),
+                          // 🏆 Title
+                          Text(
+                            "Puzzle Completed!",
+                            style: GoogleFonts.poppins(
+                              fontSize: 21.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
                             ),
-                            child: Center(
-                              child: Text(
-                                "Continue",
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 17.sp,
-                                  fontWeight: FontWeight.w600,
+                          ),
+
+                          SizedBox(height: 1.h),
+
+                          // ⏱ Time
+                          Text(
+                            "Time: $seconds seconds",
+                            style: GoogleFonts.poppins(
+                              fontSize: 17.sp,
+                              color: Colors.white70,
+                            ),
+                          ),
+
+                          SizedBox(height: 3.h),
+
+                          // ✔ Continue Button
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.pop(context);
+                            },
+                            child: Container(
+                              height: 6.h,
+                              width: 40.w,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFFA855F7),
+                                    Color(0xFF9333EA),
+                                  ],
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  "Continue",
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 17.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
-      );
-    },
-  );
-}
-
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -432,7 +445,9 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen> {
           ),
         ),
         child: loading
-            ? const Center(child: CircularProgressIndicator(color: Colors.white))
+            ? const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              )
             : Column(
                 children: [
                   SizedBox(height: 10.h),
@@ -479,9 +494,6 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen> {
   }
 
   Widget _tile(int tileIndex) {
-    return RawImage(
-      image: tiles[tileIndex],
-      fit: BoxFit.cover,
-    );
+    return RawImage(image: tiles[tileIndex], fit: BoxFit.cover);
   }
 }

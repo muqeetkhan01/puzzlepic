@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 import 'package:puzzle_app/screens/auth/splash.dart';
-import 'package:puzzle_app/screens/home/home.dart';
 
 void main() {
   runApp(
@@ -15,7 +14,6 @@ void main() {
   );
 }
 
-
 class PuzzleApp extends StatelessWidget {
   const PuzzleApp({super.key});
 
@@ -24,10 +22,10 @@ class PuzzleApp extends StatelessWidget {
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
         return MaterialApp(
-          title: "Puzzle App",
+          title: "PuzzlePic",
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
-             useMaterial3: false,
+            useMaterial3: false,
             scaffoldBackgroundColor: const Color(0xFFF9F9F9),
             fontFamily: GoogleFonts.poppins().fontFamily,
           ),

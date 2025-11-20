@@ -31,7 +31,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/
     - assets/animation/Confetti.json
 
     # you can add icons later

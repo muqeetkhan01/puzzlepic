@@ -30,7 +30,6 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 // ----------------------------------------------------------
                 // 🟣 HEADER TITLE
                 // ----------------------------------------------------------
@@ -52,7 +51,6 @@ class ProfileScreen extends StatelessWidget {
                   padding: EdgeInsets.all(4.w),
                   child: Row(
                     children: [
-
                       // Avatar
                       Container(
                         width: 16.w,
@@ -85,7 +83,7 @@ class ProfileScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "hamza",
+                              "John",
                               maxLines: 1,
                               style: GoogleFonts.poppins(
                                 fontSize: 18.sp,
@@ -98,12 +96,15 @@ class ProfileScreen extends StatelessWidget {
 
                             Row(
                               children: [
-                                Icon(Icons.email_outlined,
-                                    size: 16.sp, color: Colors.white70),
+                                Icon(
+                                  Icons.email_outlined,
+                                  size: 16.sp,
+                                  color: Colors.white70,
+                                ),
                                 SizedBox(width: 1.w),
                                 Expanded(
                                   child: Text(
-                                    "hamza@gmail.com",
+                                    "john@gmail.com",
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: GoogleFonts.poppins(
@@ -119,8 +120,11 @@ class ProfileScreen extends StatelessWidget {
 
                             Row(
                               children: [
-                                Icon(Icons.calendar_today,
-                                    size: 16.sp, color: Colors.white70),
+                                Icon(
+                                  Icons.calendar_today,
+                                  size: 16.sp,
+                                  color: Colors.white70,
+                                ),
                                 SizedBox(width: 1.w),
                                 Expanded(
                                   child: Text(
@@ -198,7 +202,10 @@ class ProfileScreen extends StatelessWidget {
                 // 🟣 ACHIEVEMENTS — Big Glass Container
                 // ----------------------------------------------------------
                 _glassContainer(
-                  padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.5.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 5.w,
+                    vertical: 2.5.h,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -213,11 +220,21 @@ class ProfileScreen extends StatelessWidget {
 
                       SizedBox(height: 2.h),
 
-                      achievementTile("🎯", "First Steps", "Complete your first puzzle"),
-                      achievementTile("⚡", "Speed Demon",
-                          "Complete 25-piece puzzle under 2 minutes"),
-                      achievementTile("🏆", "Master Solver",
-                          "Complete 50-piece puzzle"),
+                      achievementTile(
+                        "🎯",
+                        "First Steps",
+                        "Complete your first puzzle",
+                      ),
+                      achievementTile(
+                        "⚡",
+                        "Speed Demon",
+                        "Complete 25-piece puzzle under 2 minutes",
+                      ),
+                      achievementTile(
+                        "🏆",
+                        "Master Solver",
+                        "Complete 50-piece puzzle",
+                      ),
                       achievementTile("💪", "Dedicated", "Play 10 games"),
                     ],
                   ),
@@ -241,7 +258,11 @@ class ProfileScreen extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.logout, color: Colors.red.shade400, size: 18.sp),
+                          Icon(
+                            Icons.logout,
+                            color: Colors.red.shade400,
+                            size: 18.sp,
+                          ),
                           SizedBox(width: 2.w),
                           Text(
                             "Logout",
@@ -280,7 +301,10 @@ class ProfileScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.08),
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: Colors.white.withOpacity(0.20), width: 1.2),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.20),
+              width: 1.2,
+            ),
           ),
           child: child,
         ),
@@ -314,10 +338,7 @@ class ProfileScreen extends StatelessWidget {
           SizedBox(height: 0.7.h),
           Text(
             label,
-            style: GoogleFonts.poppins(
-              fontSize: 14.sp,
-              color: Colors.white70,
-            ),
+            style: GoogleFonts.poppins(fontSize: 14.sp, color: Colors.white70),
           ),
         ],
       ),
@@ -372,7 +393,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

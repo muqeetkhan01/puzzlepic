@@ -40,7 +40,7 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Align(
-                      alignment: Alignment.centerLeft,
+                      alignment: Alignment.center,
                       child: Icon(
                         Icons.extension,
                         size: 7.h,
@@ -48,10 +48,10 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
 
-                    SizedBox(height: 4.h),
+                    SizedBox(height: 2.h),
 
                     Text(
-                      "Puzzle pic",
+                      "Puzzle Pic",
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
                         fontSize: 28.sp,
