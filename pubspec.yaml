@@ -1,5 +1,5 @@
 name: puzzle_app
-description: "Photo Puzzle App "
+description: "Photo Puzzle App"
 publish_to: "none"
 version: 1.0.0+1
 
@@ -20,6 +20,7 @@ dependencies:
   # Image handling (split, crop, convert)
   image: ^4.1.7
   image_picker: ^1.1.2
+  image_cropper:    
 
 dev_dependencies:
   flutter_test:
@@ -32,5 +33,6 @@ flutter:
 
   assets:
     - assets/animation/Confetti.json
+    - assets/images/
 
     # you can add icons later

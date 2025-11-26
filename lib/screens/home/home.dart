@@ -39,28 +39,33 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: Icon(
-                        Icons.extension,
-                        size: 7.h,
-                        color: AppColors.white,
-                      ),
-                    ),
-
+                    // Align(
+                    //   alignment: Alignment.center,
+                    //   child: Icon(
+                    //     Icons.extension,
+                    //     size: 7.h,
+                    //     color: AppColors.white,
+                    //   ),
+                    // ),
                     SizedBox(height: 2.h),
-
-                    Text(
-                      "Puzzle Pic",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                        fontSize: 28.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.white,
-                        height: 1.1,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        height: 10.h,
+                        width: 10.h,
                       ),
                     ),
-
+                    // Text(
+                    //   "Puzzle Pic",
+                    //   textAlign: TextAlign.center,
+                    //   style: GoogleFonts.poppins(
+                    //     fontSize: 28.sp,
+                    //     fontWeight: FontWeight.w600,
+                    //     color: AppColors.white,
+                    //     height: 1.1,
+                    //   ),
+                    // ),
                     SizedBox(height: 2.h),
 
                     Text(
@@ -76,8 +81,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 4.h),
-
+              // SizedBox(height: 2.h),
               _soloCard(context),
               SizedBox(height: 4.h),
 
@@ -139,7 +143,35 @@ class HomeScreen extends StatelessWidget {
 
                 // BLUE BUTTON (25)
                 _gradientButton(
-                  "25 Pieces - Easy",
+                  "5 Pieces",
+                  AppColors.loginButtonGradient,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PuzzleScreen(pieceCount: 5),
+                      ),
+                    );
+                  },
+                ),
+
+                SizedBox(height: 2.h),
+                _gradientButton(
+                  "10 Pieces",
+                  AppColors.signupButtonGradient,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PuzzleScreen(pieceCount: 10),
+                      ),
+                    );
+                  },
+                ),
+
+                SizedBox(height: 2.h),
+                _gradientButton(
+                  "25 Pieces",
                   AppColors.loginButtonGradient,
                   onTap: () {
                     Navigator.push(
@@ -155,7 +187,7 @@ class HomeScreen extends StatelessWidget {
 
                 // PURPLE BUTTON (50)
                 _gradientButton(
-                  "50 Pieces - Hard",
+                  "50 Pieces",
                   AppColors.signupButtonGradient,
                   onTap: () {
                     Navigator.push(

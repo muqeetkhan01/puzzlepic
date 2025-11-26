@@ -18,184 +18,180 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ResponsiveSizer(
-        builder: (_, __, ___) {
-          return Container(
-            width: 100.w,
-            height: 100.h,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: AppColors.backgroundGradient,
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-            child: SafeArea(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
-                  child: Column(
-                    children: [
-                      SizedBox(height: 3.h),
+      body: Container(
+        width: 100.w,
+        height: 100.h,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: AppColors.backgroundGradient,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
+              child: Column(
+                children: [
+                  SizedBox(height: 3.h),
 
-                      // LOGO
-                      Container(
-                        height: 13.h,
-                        width: 13.h,
+                  // LOGO
+                  Container(
+                    height: 13.h,
+                    width: 13.h,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(22.sp),
+                      gradient: const LinearGradient(
+                        colors: AppColors.logoGradient,
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.extension,
+                      size: 7.h,
+                      color: Colors.white,
+                    ),
+                  ),
+
+                  SizedBox(height: 2.5.h),
+
+                  // TITLE
+                  Text(
+                    "PuzzlePic",
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+
+                  SizedBox(height: 1.h),
+
+                  Text(
+                    "Sign in to start your puzzle journey",
+                    style: GoogleFonts.inter(
+                      color: AppColors.white70,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+
+                  SizedBox(height: 4.h),
+
+                  // CARD WITH BLUR
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(22),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 26, sigmaY: 26),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 5.w,
+                          vertical: 3.h,
+                        ),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(22.sp),
-                          gradient: const LinearGradient(
-                            colors: AppColors.logoGradient,
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                          borderRadius: BorderRadius.circular(22),
+                          color: AppColors.white10,
+                          border: Border.all(
+                            color: AppColors.white20,
+                            width: 1,
                           ),
                         ),
-                        child: Icon(
-                          Icons.extension,
-                          size: 7.h,
-                          color: Colors.white,
-                        ),
-                      ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildToggle(),
 
-                      SizedBox(height: 2.5.h),
+                            SizedBox(height: 3.h),
 
-                      // TITLE
-                      Text(
-                        "PuzzlePic",
-                        style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontSize: 24.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                            if (!isLogin) _label("Full Name"),
+                            if (!isLogin) SizedBox(height: 1.h),
+                            if (!isLogin)
+                              _input(Icons.person_outline, "John Doe"),
 
-                      SizedBox(height: 1.h),
+                            if (!isLogin) SizedBox(height: 1.5.h),
 
-                      Text(
-                        "Sign in to start your puzzle journey",
-                        style: GoogleFonts.inter(
-                          color: AppColors.white70,
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
+                            _label("Email"),
+                            SizedBox(height: 1.h),
+                            _input(Icons.mail_outline, "your@email.com"),
 
-                      SizedBox(height: 4.h),
+                            SizedBox(height: 1.5.h),
 
-                      // CARD WITH BLUR
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(22),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 26, sigmaY: 26),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 5.w,
-                              vertical: 3.h,
+                            _label("Password"),
+                            SizedBox(height: 1.h),
+                            _input(
+                              Icons.lock_outline,
+                              "••••••••",
+                              isPass: true,
                             ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(22),
-                              color: AppColors.white10,
-                              border: Border.all(
-                                color: AppColors.white20,
-                                width: 1,
-                              ),
+
+                            SizedBox(height: 3.5.h),
+
+                            _button(
+                              isLogin ? "Login" : "Create Account",
+                              isLogin
+                                  ? AppColors.loginButtonGradient
+                                  : AppColors.signupButtonGradient,
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildToggle(),
 
-                                SizedBox(height: 3.h),
+                            SizedBox(height: 3.h),
 
-                                if (!isLogin) _label("Full Name"),
-                                if (!isLogin) SizedBox(height: 1.h),
-                                if (!isLogin)
-                                  _input(Icons.person_outline, "John Doe"),
+                            _divider(),
 
-                                if (!isLogin) SizedBox(height: 1.5.h),
+                            SizedBox(height: 3.h),
 
-                                _label("Email"),
-                                SizedBox(height: 1.h),
-                                _input(Icons.mail_outline, "your@email.com"),
-
-                                SizedBox(height: 1.5.h),
-
-                                _label("Password"),
-                                SizedBox(height: 1.h),
-                                _input(
-                                  Icons.lock_outline,
-                                  "••••••••",
-                                  isPass: true,
+                            // Guest Login Button
+                            GestureDetector(
+                              onTap: () {
+                                // TODO: Navigate as guest
+                              },
+                              child: Container(
+                                height: 5.4.h, // matches new smaller height
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: AppColors.white20,
+                                    width: 1,
+                                  ),
+                                  color: Colors.white.withOpacity(0.07),
                                 ),
-
-                                SizedBox(height: 3.5.h),
-
-                                _button(
-                                  isLogin ? "Login" : "Create Account",
-                                  isLogin
-                                      ? AppColors.loginButtonGradient
-                                      : AppColors.signupButtonGradient,
-                                ),
-
-                                SizedBox(height: 3.h),
-
-                                _divider(),
-
-                                SizedBox(height: 3.h),
-
-                                // Guest Login Button
-                                GestureDetector(
-                                  onTap: () {
-                                    // TODO: Navigate as guest
-                                  },
-                                  child: Container(
-                                    height: 5.4.h, // matches new smaller height
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: AppColors.white20,
-                                        width: 1,
-                                      ),
-                                      color: Colors.white.withOpacity(0.07),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        "Continue as Guest",
-                                        style: GoogleFonts.inter(
-                                          color: Colors.white,
-                                          fontSize: 15.sp,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
+                                child: Center(
+                                  child: Text(
+                                    "Continue as Guest",
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white,
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
-
-                      SizedBox(height: 3.5.h),
-
-                      Text(
-                        "By continuing, you agree to our Terms of\nService and Privacy Policy",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
-                          color: AppColors.white50,
-                          fontSize: 15.sp,
-                        ),
-                      ),
-
-                      SizedBox(height: 3.h),
-                    ],
+                    ),
                   ),
-                ),
+
+                  SizedBox(height: 3.5.h),
+
+                  Text(
+                    "By continuing, you agree to our Terms of\nService and Privacy Policy",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      color: AppColors.white50,
+                      fontSize: 15.sp,
+                    ),
+                  ),
+
+                  SizedBox(height: 3.h),
+                ],
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -287,38 +283,33 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   }
 
   Widget _button(String text, List<Color> colors) {
-  return GestureDetector(
-  onTap: () {
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (_) =>  BottomNavScreen(selected: 0),
-    ),
-  );
-},
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => BottomNavScreen(selected: 0)),
+        );
+      },
 
-
-
-    child: Container(
-      height: 5.4.h, // smaller height
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: colors),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: GoogleFonts.inter(
-            color: Colors.white,
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
+      child: Container(
+        height: 5.4.h, // smaller height
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: colors),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: GoogleFonts.inter(
+              color: Colors.white,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   Widget _divider() {
     return Row(

@@ -78,9 +78,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     fontSize: 22.sp,
                   ),
                 ).animate().fadeIn(duration: 600.ms),
-
                 SizedBox(height: 1.5.h),
-
                 Text(
                   "Sharpen your mind. One puzzle at a time.",
                   style: GoogleFonts.inter(

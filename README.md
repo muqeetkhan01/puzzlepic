@@ -1,16 +1,6 @@
-# puzzle_app
+1. Screen should not shrink when keyboard opens
+2. 5, 10, 25, 50 pieces
+3. Bottom Navigation issue opn android due to default buttons of OS
+4. Make 50 grid 5 in column
+5. Highlight the last move 
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
