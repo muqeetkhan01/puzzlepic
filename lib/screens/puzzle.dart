@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lottie/lottie.dart';
+import 'package:puzzle_app/widgets/bottom_nav.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import '../config/colors.dart';
 
@@ -415,55 +416,31 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
   }
 
   Future _preparePuzzle() async {
+    // 1️⃣ Load the already-cropped image
     final data = await widget.imageFile.readAsBytes();
     fullImage = await decodeImageFromList(data);
 
-    // ------------------------------------------
-    // 1️⃣ MAKE IMAGE PERFECTLY SQUARE FIRST
-    // ------------------------------------------
-    int shortest = fullImage!.width < fullImage!.height
-        ? fullImage!.width
-        : fullImage!.height;
+    final img = fullImage!;
+    final int imgW = img.width;
+    final int imgH = img.height;
 
-    int xOffset = (fullImage!.width - shortest) ~/ 2;
-    int yOffset = (fullImage!.height - shortest) ~/ 2;
+    // 2️⃣ Make width/height divisible by cols/rows (crop a tiny bit if needed)
+    final int usableW = imgW - (imgW % cols);
+    final int usableH = imgH - (imgH % rows);
 
-    ui.PictureRecorder recorderSquare = ui.PictureRecorder();
-    Canvas squareCanvas = Canvas(recorderSquare);
-    Paint p = Paint();
-
-    squareCanvas.drawImageRect(
-      fullImage!,
-      Rect.fromLTWH(
-        xOffset.toDouble(),
-        yOffset.toDouble(),
-        shortest.toDouble(),
-        shortest.toDouble(),
-      ),
-      Rect.fromLTWH(0, 0, shortest.toDouble(), shortest.toDouble()),
-      p,
-    );
-
-    ui.Image squareImage = await recorderSquare.endRecording().toImage(
-      shortest,
-      shortest,
-    );
-
-    // ------------------------------------------
-    // 2️⃣ NOW CROP INTO PRECISE GRID TILES
-    // ------------------------------------------
-    int tileW = shortest ~/ cols;
-    int tileH = shortest ~/ rows;
+    final int tileW = usableW ~/ cols;
+    final int tileH = usableH ~/ rows;
 
     tiles.clear();
 
+    // 3️⃣ Cut into tiles directly from the full (rectangular) image
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
-        ui.PictureRecorder recorder = ui.PictureRecorder();
-        Canvas canvas = Canvas(recorder);
+        final recorder = ui.PictureRecorder();
+        final canvas = Canvas(recorder);
 
         canvas.drawImageRect(
-          squareImage,
+          img,
           Rect.fromLTWH(
             (c * tileW).toDouble(),
             (r * tileH).toDouble(),
@@ -474,19 +451,16 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
           Paint(),
         );
 
-        ui.Image tileImg = await recorder.endRecording().toImage(tileW, tileH);
+        final tileImg = await recorder.endRecording().toImage(tileW, tileH);
         tiles.add(tileImg);
       }
     }
 
-    // ------------------------------------------
-    // 3️⃣ SHUFFLE TILES
-    // ------------------------------------------
+    // 4️⃣ Shuffle order
     tileOrder = List.generate(tiles.length, (i) => i)..shuffle();
 
     setState(() => loading = false);
   }
-
   // void _swapTiles(int a, int b) {
   //   setState(() {
   //     final temp = tileOrder[a];
@@ -593,8 +567,12 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
                           // ✔ Continue Button
                           GestureDetector(
                             onTap: () {
-                              Navigator.pop(context);
-                              Navigator.pop(context);
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BottomNavScreen(selected: 0),
+                                ),
+                              );
                             },
                             child: Container(
                               height: 6.h,
