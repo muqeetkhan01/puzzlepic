@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
@@ -41,24 +42,46 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
       if (picked == null) return;
 
       File rawImage = File(picked.path);
-
       int rows, cols;
-      if (widget.pieceCount == 5) {
-        rows = 1;
-        cols = 5;
-      } else if (widget.pieceCount == 10) {
-        rows = 2;
-        cols = 5;
-      } else if (widget.pieceCount == 25) {
-        rows = 5;
-        cols = 5;
-      } else if (widget.pieceCount == 50) {
-        rows = 10;
-        cols = 5;
-      } else {
-        rows = 5;
-        cols = 5;
+      switch (widget.pieceCount) {
+        case 9:
+          rows = 3;
+          cols = 3;
+          break; // 3x3
+        case 16:
+          rows = 4;
+          cols = 4;
+          break; // 4x4
+        case 25:
+          rows = 5;
+          cols = 5;
+          break; // 5x5
+        case 50:
+          rows = 10;
+          cols = 5;
+          break; // 7x7
+        default:
+          rows = 3;
+          cols = 3;
+          break;
       }
+      // int rows, cols;
+      // if (widget.pieceCount == 5) {
+      //   rows = 1;
+      //   cols = 5;
+      // } else if (widget.pieceCount == 10) {
+      //   rows = 2;
+      //   cols = 5;
+      // } else if (widget.pieceCount == 25) {
+      //   rows = 5;
+      //   cols = 5;
+      // } else if (widget.pieceCount == 50) {
+      //   rows = 10;
+      //   cols = 5;
+      // } else {
+      //   rows = 5;
+      //   cols = 5;
+      // }
 
       double ratioX = cols.toDouble();
       double ratioY = rows.toDouble();
@@ -108,21 +131,23 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 4.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _topBar(),
-              SizedBox(height: 4.h),
-              _header(),
-              SizedBox(height: 3.h),
-              _uploadCard(),
-              SizedBox(height: imageFile != null ? 4.h : 2.h),
-              if (imageFile != null) _startButton(),
-              SizedBox(height: 4.h),
-              _tipsSection(),
-            ],
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 0.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _topBar(),
+                SizedBox(height: 2.h),
+                _header(),
+                SizedBox(height: 3.h),
+                _uploadCard(),
+                SizedBox(height: imageFile != null ? 4.h : 2.h),
+                if (imageFile != null) _startButton(),
+                SizedBox(height: 4.h),
+                _tipsSection(),
+              ],
+            ),
           ),
         ),
       ),
@@ -130,11 +155,13 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
   }
 
   Widget _topBar() {
-    return GestureDetector(
-      onTap: () => Navigator.pop(context),
+    return InkWell(
+      onTap: () => Get.back(),
       child: Row(
         children: [
-          Icon(Icons.arrow_back, color: AppColors.white, size: 20.sp),
+          InkWell(
+            child: Icon(Icons.arrow_back, color: AppColors.white, size: 20.sp),
+          ),
           SizedBox(width: 2.w),
           Text(
             "Back",
@@ -359,21 +386,27 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
   int seconds = 0;
   ui.Image? fullImage;
   void _setGrid() {
-    if (widget.pieceCount == 5) {
-      rows = 1;
-      cols = 5;
-    } else if (widget.pieceCount == 10) {
-      rows = 2;
-      cols = 5;
-    } else if (widget.pieceCount == 25) {
-      rows = 5;
-      cols = 5;
-    } else if (widget.pieceCount == 50) {
-      rows = 10;
-      cols = 5;
-    } else {
-      rows = 5;
-      cols = 5; // fallback
+    switch (widget.pieceCount) {
+      case 9:
+        rows = 3;
+        cols = 3;
+        break; // 3x3
+      case 16:
+        rows = 4;
+        cols = 4;
+        break; // 4x4
+      case 25:
+        rows = 5;
+        cols = 5;
+        break; // 5x5
+      case 50:
+        rows = 10;
+        cols = 5;
+        break; // 7x7
+      default:
+        rows = 3;
+        cols = 3;
+        break;
     }
   }
 
@@ -416,7 +449,6 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
   }
 
   Future _preparePuzzle() async {
-    // 1️⃣ Load the already-cropped image
     final data = await widget.imageFile.readAsBytes();
     fullImage = await decodeImageFromList(data);
 
@@ -424,52 +456,57 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
     final int imgW = img.width;
     final int imgH = img.height;
 
-    // 2️⃣ Make width/height divisible by cols/rows (crop a tiny bit if needed)
-    final int usableW = imgW - (imgW % cols);
-    final int usableH = imgH - (imgH % rows);
+    // Make image perfectly square
+    final int side = imgW < imgH ? imgW : imgH;
+    final int x = (imgW - side) ~/ 2;
+    final int y = (imgH - side) ~/ 2;
 
-    final int tileW = usableW ~/ cols;
-    final int tileH = usableH ~/ rows;
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    canvas.drawImageRect(
+      img,
+      Rect.fromLTWH(
+        x.toDouble(),
+        y.toDouble(),
+        side.toDouble(),
+        side.toDouble(),
+      ),
+      Rect.fromLTWH(0, 0, side.toDouble(), side.toDouble()),
+      Paint(),
+    );
+
+    final squareImage = await recorder.endRecording().toImage(side, side);
+
+    // Now cut into perfect tiles
+    final int tileSize = side ~/ rows;
 
     tiles.clear();
 
-    // 3️⃣ Cut into tiles directly from the full (rectangular) image
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
-        final recorder = ui.PictureRecorder();
-        final canvas = Canvas(recorder);
+        final rec = ui.PictureRecorder();
+        final cv = Canvas(rec);
 
-        canvas.drawImageRect(
-          img,
+        cv.drawImageRect(
+          squareImage,
           Rect.fromLTWH(
-            (c * tileW).toDouble(),
-            (r * tileH).toDouble(),
-            tileW.toDouble(),
-            tileH.toDouble(),
+            (c * tileSize).toDouble(),
+            (r * tileSize).toDouble(),
+            tileSize.toDouble(),
+            tileSize.toDouble(),
           ),
-          Rect.fromLTWH(0, 0, tileW.toDouble(), tileH.toDouble()),
+          Rect.fromLTWH(0, 0, tileSize.toDouble(), tileSize.toDouble()),
           Paint(),
         );
 
-        final tileImg = await recorder.endRecording().toImage(tileW, tileH);
-        tiles.add(tileImg);
+        tiles.add(await rec.endRecording().toImage(tileSize, tileSize));
       }
     }
 
-    // 4️⃣ Shuffle order
     tileOrder = List.generate(tiles.length, (i) => i)..shuffle();
-
     setState(() => loading = false);
   }
-  // void _swapTiles(int a, int b) {
-  //   setState(() {
-  //     final temp = tileOrder[a];
-  //     tileOrder[a] = tileOrder[b];
-  //     tileOrder[b] = temp;
-  //   });
-
-  //   _checkWin();
-  // }
 
   void _checkWin() {
     for (int i = 0; i < tileOrder.length; i++) {
@@ -663,64 +700,83 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
                   ),
 
                   Expanded(
-                    child: GridView.builder(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: tiles.length == 50 ? 7.w : 2.5.w,
-                        vertical: tiles.length == 50 ? 4.h : 2.h,
-                      ),
-                      itemCount: tiles.length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: cols,
-                        crossAxisSpacing: 4,
-                        mainAxisSpacing: 4,
-                      ),
-                      itemBuilder: (context, index) {
-                        bool isSelected = index == selectedTileIndex;
-                        bool isHover = index == hoverTileIndex;
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        // Determine max possible tile size
+                        double maxWidth = constraints.maxWidth * 0.92;
+                        double maxHeight = constraints.maxHeight * 0.92;
 
-                        return DragTarget<int>(
-                          onWillAccept: (_) {
-                            setState(() => hoverTileIndex = index);
-                            return true;
-                          },
+                        double tileSizeW = maxWidth / cols;
+                        double tileSizeH = maxHeight / rows;
 
-                          onLeave: (_) {
-                            setState(() => hoverTileIndex = null);
-                          },
+                        double tileSize = tileSizeW < tileSizeH
+                            ? tileSizeW
+                            : tileSizeH;
 
-                          onAccept: (fromIndex) => _swapTiles(fromIndex, index),
+                        return Center(
+                          child: SizedBox(
+                            width: tileSize * cols,
+                            height: tileSize * rows,
+                            child: GridView.builder(
+                              physics: const NeverScrollableScrollPhysics(),
+                              padding: EdgeInsets.zero,
+                              itemCount: tiles.length,
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: cols,
+                                  ),
+                              itemBuilder: (context, index) {
+                                bool isSelected = index == selectedTileIndex;
+                                bool isHover = index == hoverTileIndex;
 
-                          builder: (context, _, __) {
-                            return Draggable<int>(
-                              data: index,
-                              onDragStarted: () {
-                                setState(() => selectedTileIndex = index);
+                                return DragTarget<int>(
+                                  onWillAccept: (_) {
+                                    setState(() => hoverTileIndex = index);
+                                    return true;
+                                  },
+                                  onLeave: (_) =>
+                                      setState(() => hoverTileIndex = null),
+                                  onAccept: (fromIndex) =>
+                                      _swapTiles(fromIndex, index),
+                                  builder: (context, _, __) {
+                                    return Draggable<int>(
+                                      data: index,
+                                      feedback: SizedBox(
+                                        width: tileSize,
+                                        height: tileSize,
+                                        child: _animatedTile(
+                                          index,
+                                          isSelected,
+                                          isHover,
+                                        ),
+                                      ),
+                                      childWhenDragging: Opacity(
+                                        opacity: 0.25,
+                                        child: SizedBox(
+                                          width: tileSize,
+                                          height: tileSize,
+                                          child: _animatedTile(
+                                            index,
+                                            false,
+                                            false,
+                                          ),
+                                        ),
+                                      ),
+                                      child: SizedBox(
+                                        width: tileSize,
+                                        height: tileSize,
+                                        child: _animatedTile(
+                                          index,
+                                          isSelected,
+                                          isHover,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
                               },
-                              onDragEnd: (_) {
-                                setState(() {
-                                  selectedTileIndex = null;
-                                  hoverTileIndex = null;
-                                });
-                              },
-
-                              feedback: AnimatedScale(
-                                scale: 1.15,
-                                duration: const Duration(milliseconds: 120),
-                                child: _animatedTile(
-                                  index,
-                                  isSelected,
-                                  isHover,
-                                ),
-                              ),
-
-                              childWhenDragging: Opacity(
-                                opacity: 0.25,
-                                child: _animatedTile(index, false, false),
-                              ),
-
-                              child: _animatedTile(index, isSelected, isHover),
-                            );
-                          },
+                            ),
+                          ),
                         );
                       },
                     ),

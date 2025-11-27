@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:puzzle_app/config/colors.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -143,29 +144,19 @@ class HomeScreen extends StatelessWidget {
 
                 // BLUE BUTTON (25)
                 _gradientButton(
-                  "5 Pieces",
+                  "9 Pieces",
                   [Color(0xFF22C55E), Color(0xFF16A34A)],
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PuzzleScreen(pieceCount: 5),
-                      ),
-                    );
+                    Get.to(PuzzleScreen(pieceCount: 9));
                   },
                 ),
 
                 SizedBox(height: 2.h),
                 _gradientButton(
-                  "10 Pieces",
+                  "12 Pieces",
                   AppColors.signupButtonGradient,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PuzzleScreen(pieceCount: 10),
-                      ),
-                    );
+                    Get.to(PuzzleScreen(pieceCount: 12));
                   },
                 ),
 
@@ -174,12 +165,7 @@ class HomeScreen extends StatelessWidget {
                   "25 Pieces",
                   AppColors.loginButtonGradient,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PuzzleScreen(pieceCount: 25),
-                      ),
-                    );
+                    Get.to(PuzzleScreen(pieceCount: 25));
                   },
                 ),
 
@@ -190,12 +176,7 @@ class HomeScreen extends StatelessWidget {
                   "50 Pieces",
                   [Color(0xFFFF8C00), Color(0xFFE65100)],
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PuzzleScreen(pieceCount: 50),
-                      ),
-                    );
+                    Get.to(PuzzleScreen(pieceCount: 50));
                   },
                 ),
 
@@ -253,7 +234,7 @@ class HomeScreen extends StatelessWidget {
                 ]),
                 SizedBox(height: 2.h),
 
-                _gradientButton("50 Pieces - Hard", [
+                _gradientButton("49 Pieces - Hard", [
                   Color(0xFFFF8C00),
                   Color(0xFFE65100),
                 ]),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
@@ -21,7 +22,7 @@ class PuzzleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
-        return MaterialApp(
+        return GetMaterialApp(
           title: "PuzzlePic",
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
