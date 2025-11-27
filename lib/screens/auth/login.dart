@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:puzzle_app/widgets/bottom_nav.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -38,36 +39,30 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                   SizedBox(height: 3.h),
 
                   // LOGO
-                  Container(
-                    height: 13.h,
-                    width: 13.h,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(22.sp),
-                      gradient: const LinearGradient(
-                        colors: AppColors.logoGradient,
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.extension,
-                      size: 7.h,
-                      color: Colors.white,
-                    ),
-                  ),
+                  ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          height: 12.h,
+                          width: 12.h,
+                          // color: Colors.white,
+                        ),
+                      )
+                      .animate()
+                      .fadeIn(duration: 800.ms)
+                      .scale(begin: const Offset(0.7, 0.7), duration: 800.ms),
 
                   SizedBox(height: 2.5.h),
 
                   // TITLE
-                  Text(
-                    "PuzzlePic",
-                    style: GoogleFonts.inter(
-                      color: Colors.white,
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-
+                  // Text(
+                  //   "PuzzlePic",
+                  //   style: GoogleFonts.inter(
+                  //     color: Colors.white,
+                  //     fontSize: 24.sp,
+                  //     fontWeight: FontWeight.w700,
+                  //   ),
+                  // ),
                   SizedBox(height: 1.h),
 
                   Text(

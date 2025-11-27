@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
@@ -28,57 +29,68 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
   File? imageFile;
 
   Future pickImage() async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (picked == null) return;
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1200, // prevent huge images
+        maxHeight: 1200,
+        imageQuality: 90,
+      );
 
-    File rawImage = File(picked.path);
+      if (picked == null) return;
 
-    // Determine grid based on pieceCount
-    int rows, cols;
+      File rawImage = File(picked.path);
 
-    if (widget.pieceCount == 5) {
-      rows = 1;
-      cols = 5;
-    } else if (widget.pieceCount == 10) {
-      rows = 2;
-      cols = 5;
-    } else if (widget.pieceCount == 25) {
-      rows = 5;
-      cols = 5;
-    } else if (widget.pieceCount == 50) {
-      rows = 10;
-      cols = 5;
-    } else {
-      rows = 5;
-      cols = 5;
-    }
+      int rows, cols;
+      if (widget.pieceCount == 5) {
+        rows = 1;
+        cols = 5;
+      } else if (widget.pieceCount == 10) {
+        rows = 2;
+        cols = 5;
+      } else if (widget.pieceCount == 25) {
+        rows = 5;
+        cols = 5;
+      } else if (widget.pieceCount == 50) {
+        rows = 10;
+        cols = 5;
+      } else {
+        rows = 5;
+        cols = 5;
+      }
 
-    // Correct crop ratio based on grid
-    double ratioX = cols.toDouble();
-    double ratioY = rows.toDouble();
+      double ratioX = cols.toDouble();
+      double ratioY = rows.toDouble();
 
-    // Image cropper UI
-    CroppedFile? croppedFile = await ImageCropper().cropImage(
-      sourcePath: rawImage.path,
-      aspectRatio: CropAspectRatio(ratioX: ratioX, ratioY: ratioY),
-      compressFormat: ImageCompressFormat.png,
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: 'Crop Image',
-          toolbarColor: Colors.black,
-          toolbarWidgetColor: Colors.white,
-          hideBottomControls: false,
-          lockAspectRatio: true,
-        ),
-        IOSUiSettings(title: 'Crop Image', aspectRatioLockEnabled: true),
-      ],
-    );
+      CroppedFile? cropped = await ImageCropper().cropImage(
+        sourcePath: rawImage.path,
+        aspectRatio: CropAspectRatio(ratioX: ratioX, ratioY: ratioY),
+        compressFormat: ImageCompressFormat.jpg, // FIXED PNG CRASH
+        compressQuality: 95,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: "Crop Image",
+            toolbarColor: Colors.black,
+            toolbarWidgetColor: Colors.white,
+            lockAspectRatio: true,
+            hideBottomControls: false,
+          ),
+          IOSUiSettings(title: "Crop Image", aspectRatioLockEnabled: true),
+        ],
+      );
 
-    // Convert CroppedFile → File
-    if (croppedFile != null) {
-      File finalImage = File(croppedFile.path);
+      if (cropped == null) {
+        debugPrint("❌ Cropping canceled.");
+        return;
+      }
 
+      File finalImage = File(cropped.path);
       setState(() => imageFile = finalImage);
+    } catch (e) {
+      debugPrint("❌ Image pick error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to load image. Try again.")),
+      );
     }
   }
 
@@ -96,32 +108,19 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
           ),
         ),
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 5.h),
+          padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 4.h),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Row(
-                  children: [
-                    Icon(Icons.arrow_back, color: AppColors.white),
-                    SizedBox(width: 2.w),
-                    Text(
-                      "Back to Menu",
-                      style: GoogleFonts.poppins(
-                        fontSize: 17.sp,
-                        color: AppColors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 20.h),
+              _topBar(),
+              SizedBox(height: 4.h),
+              _header(),
+              SizedBox(height: 3.h),
               _uploadCard(),
-              if (imageFile != null) SizedBox(height: 3.h),
-              if (imageFile != null) _startButton(context),
+              SizedBox(height: imageFile != null ? 4.h : 2.h),
+              if (imageFile != null) _startButton(),
+              SizedBox(height: 4.h),
+              _tipsSection(),
             ],
           ),
         ),
@@ -129,38 +128,97 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
     );
   }
 
+  Widget _topBar() {
+    return GestureDetector(
+      onTap: () => Navigator.pop(context),
+      child: Row(
+        children: [
+          Icon(Icons.arrow_back, color: AppColors.white, size: 20.sp),
+          SizedBox(width: 2.w),
+          Text(
+            "Back",
+            style: GoogleFonts.poppins(
+              fontSize: 17.sp,
+              color: AppColors.white,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _header() {
+    return Column(
+      children: [
+        ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                'assets/images/logo.png',
+                height: 12.h,
+                width: 12.h,
+                // color: Colors.white,
+              ),
+            )
+            .animate()
+            .fadeIn(duration: 800.ms)
+            .scale(begin: const Offset(0.7, 0.7), duration: 800.ms),
+
+        // Icon(Icons.extension, color: AppColors.neonBlue, size: 16.w),
+        SizedBox(height: 1.h),
+        Text(
+          "Create Your Puzzle",
+          style: GoogleFonts.montserrat(
+            fontSize: 23.sp,
+            fontWeight: FontWeight.w800,
+            color: AppColors.white,
+          ),
+        ),
+        SizedBox(height: 1.h),
+        Text(
+          "${widget.pieceCount} Piece Puzzle",
+          style: GoogleFonts.poppins(fontSize: 16.sp, color: AppColors.white70),
+        ),
+      ],
+    );
+  }
+
   Widget _uploadCard() {
     return ClipRRect(
       borderRadius: BorderRadius.circular(30),
       child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        filter: ui.ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
           padding: EdgeInsets.all(6.w),
           decoration: BoxDecoration(
             color: AppColors.white10,
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: AppColors.white20),
+            border: Border.all(color: AppColors.white20, width: 1.5),
           ),
           child: Column(
             children: [
               Text(
                 "Upload Your Photo",
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.montserrat(
                   fontSize: 20.sp,
                   color: AppColors.white,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              SizedBox(height: 4.h),
+              SizedBox(height: 3.h),
 
               GestureDetector(
                 onTap: pickImage,
                 child: Container(
-                  height: 30.h,
+                  height: 28.h,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.white40, width: 2),
+                    border: Border.all(
+                      color: AppColors.neonPink.withOpacity(0.7),
+                      width: 2.5,
+                      style: BorderStyle.solid,
+                    ),
                   ),
                   child: Center(
                     child: imageFile == null
@@ -168,13 +226,13 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.image_outlined,
-                                size: 10.h,
-                                color: AppColors.white70,
+                                Icons.cloud_upload_rounded,
+                                size: 12.h,
+                                color: AppColors.neonBlue,
                               ),
-                              SizedBox(height: 2.h),
+                              SizedBox(height: 1.h),
                               Text(
-                                "Drag and drop your\nimage here\n\nor click to browse",
+                                "Click to browse\nor drag & drop",
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.poppins(
                                   fontSize: 16.sp,
@@ -190,14 +248,14 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
                                 borderRadius: BorderRadius.circular(15),
                                 child: Image.file(
                                   imageFile!,
-                                  height: 18.h,
-                                  width: 18.h,
+                                  height: 16.h,
+                                  width: 16.h,
                                   fit: BoxFit.cover,
                                 ),
                               ),
-                              SizedBox(height: 2.h),
+                              SizedBox(height: 1.5.h),
                               Text(
-                                "Click to change image",
+                                "Tap to change image",
                                 style: GoogleFonts.poppins(
                                   fontSize: 15.sp,
                                   color: AppColors.white70,
@@ -215,10 +273,9 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
     );
   }
 
-  Widget _startButton(BuildContext context) {
+  Widget _startButton() {
     return GestureDetector(
       onTap: () {
-        if (imageFile == null) return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -233,24 +290,44 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
         height: 7.h,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.greenAccent.shade400,
+          gradient: LinearGradient(
+            colors: [AppColors.neonPink, AppColors.puzzleRed],
+          ),
           borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.neonPink.withOpacity(0.5),
+              blurRadius: 15,
+              spreadRadius: 1,
+            ),
+          ],
         ),
         child: Center(
           child: Text(
             "Start Puzzle",
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.montserrat(
               fontSize: 18.sp,
               color: AppColors.white,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),
       ),
     );
   }
-}
 
+  Widget _tipsSection() {
+    return Column(
+      children: [
+        Text(
+          "Make sure your image is bright & clear.\nCropping will auto-fit the puzzle grid.",
+          textAlign: TextAlign.center,
+          style: GoogleFonts.poppins(fontSize: 14.sp, color: AppColors.white50),
+        ),
+      ],
+    );
+  }
+}
 // -------------------------------------------------------
 //  PUZZLE GAME SCREEN
 // -------------------------------------------------------

@@ -17,39 +17,46 @@ class GlassBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(22.sp),
-        topRight: Radius.circular(22.sp),
-      ),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 1.4.h),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.white.withOpacity(0.10),
-                Colors.white.withOpacity(0.04),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-            border: Border(
-              top: BorderSide(
-                color: Colors.white.withOpacity(0.25),
-                width: 1,
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 7.0, right: 7),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(22.sp),
+            topRight: Radius.circular(22.sp),
+            bottomLeft: Radius.circular(22.sp),
+            bottomRight: Radius.circular(22.sp),
+          ),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: .8.h),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withOpacity(0.10),
+                    Colors.white.withOpacity(0.04),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.white.withOpacity(0.25),
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _navItem(Icons.home_outlined, "Home", 0),
+                  _navItem(Icons.emoji_events_outlined, "Leaderboard", 1),
+                  _navItem(Icons.person_outline, "Profile", 2),
+                  _navItem(Icons.settings_outlined, "Settings", 3),
+                ],
               ),
             ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _navItem(Icons.home_outlined, "Home", 0),
-              _navItem(Icons.emoji_events_outlined, "Leaderboard", 1),
-              _navItem(Icons.person_outline, "Profile", 2),
-              _navItem(Icons.settings_outlined, "Settings", 3),
-            ],
           ),
         ),
       ),
@@ -71,11 +78,7 @@ class GlassBottomNav extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: active ? 22.sp : 20.sp,
-              color: Colors.white,
-            ),
+            Icon(icon, size: active ? 22.sp : 20.sp, color: Colors.white),
             SizedBox(height: 0.5.h),
             Text(
               label,

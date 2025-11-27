@@ -89,7 +89,7 @@ class HomeScreen extends StatelessWidget {
               SizedBox(height: 4.h),
 
               _howToPlayCard(),
-              SizedBox(height: 10.h),
+              SizedBox(height: 20.h),
             ],
           ),
         ),
@@ -144,7 +144,7 @@ class HomeScreen extends StatelessWidget {
                 // BLUE BUTTON (25)
                 _gradientButton(
                   "5 Pieces",
-                  AppColors.loginButtonGradient,
+                  [Color(0xFF22C55E), Color(0xFF16A34A)],
                   onTap: () {
                     Navigator.push(
                       context,
@@ -188,7 +188,7 @@ class HomeScreen extends StatelessWidget {
                 // PURPLE BUTTON (50)
                 _gradientButton(
                   "50 Pieces",
-                  AppColors.signupButtonGradient,
+                  [Color(0xFFFF8C00), Color(0xFFE65100)],
                   onTap: () {
                     Navigator.push(
                       context,

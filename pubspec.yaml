@@ -25,6 +25,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.13.1
 
   flutter_lints: ^5.0.0
 
@@ -34,5 +35,10 @@ flutter:
   assets:
     - assets/animation/Confetti.json
     - assets/images/
+    - assets/icon/
 
     # you can add icons later
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo.png"
