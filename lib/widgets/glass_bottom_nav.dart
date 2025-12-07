@@ -1,5 +1,6 @@
 // lib/widgets/glass_bottom_nav.dart
 
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,6 +19,7 @@ class GlassBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+      bottom: Platform.isAndroid ? true : false,
       child: Padding(
         padding: const EdgeInsets.only(left: 7.0, right: 7),
         child: ClipRRect(
