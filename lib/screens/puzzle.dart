@@ -128,12 +128,19 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
             toolbarColor: Colors.black,
             toolbarWidgetColor: Colors.white,
             lockAspectRatio: true,
-            hideBottomControls: false,
+
+            // 🚫 Hide ALL bottom controls (removes the scale slider)
+            hideBottomControls: true,
           ),
-          IOSUiSettings(title: "Crop Image", aspectRatioLockEnabled: true),
+          IOSUiSettings(
+            title: "Crop Image",
+            aspectRatioLockEnabled: true,
+
+            // 🚫 iOS equivalent — hides rotate/scale options
+            showCancelConfirmationDialog: false,
+          ),
         ],
       );
-
       if (cropped == null) return;
 
       File finalImage = File(cropped.path);
@@ -1096,7 +1103,7 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
     await FirebaseFirestore.instance
         .collection("multiplayer_games")
         .doc(widget.code.toString())
-        .update({"winner": uid, "status": "finished"});
+        .update({"winnerTime": seconds, "winner": uid, "status": "finished"});
 
     showMultiplayerPopup(true);
   }
@@ -1235,13 +1242,15 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
                     SizedBox(height: 1.2.h),
 
                     // TIME TAKEN
-                    Text(
-                      "Your Time: ${seconds}s",
-                      style: GoogleFonts.poppins(
-                        fontSize: 17.sp,
-                        color: Colors.white70,
-                      ),
-                    ),
+                    won
+                        ? Text(
+                            "Your Time: ${seconds}s",
+                            style: GoogleFonts.poppins(
+                              fontSize: 17.sp,
+                              color: Colors.white70,
+                            ),
+                          )
+                        : SizedBox(),
 
                     SizedBox(height: 2.2.h),
 
