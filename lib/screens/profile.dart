@@ -1,7 +1,13 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:puzzle_app/config/colors.dart';
+import 'package:puzzle_app/screens/home/edit_profile_screen.dart';
+
+import 'package:puzzle_app/screens/auth/login.dart';
+import 'package:puzzle_app/screens/home/multi_leaderboard.dart';
+import 'package:puzzle_app/services/auth_service.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -9,6 +15,21 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = AuthService.to.firebaseUser.value;
+
+    final displayName = user?.displayName ?? "Guest";
+    final email = user?.email ?? "guest@puzzlepic.app";
+
+    final avatarLetter = displayName.isNotEmpty
+        ? displayName[0].toUpperCase()
+        : "U";
+
+    String memberSince = "N/A";
+    if (user?.metadata.creationTime != null) {
+      final date = user!.metadata.creationTime!;
+      memberSince = "${date.month}/${date.day}/${date.year}";
+    }
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
@@ -21,18 +42,14 @@ class ProfileScreen extends StatelessWidget {
             end: Alignment.bottomCenter,
           ),
         ),
-
         child: SafeArea(
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
             physics: const BouncingScrollPhysics(),
-
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ----------------------------------------------------------
-                // 🟣 HEADER TITLE
-                // ----------------------------------------------------------
+                // 🔹 HEADER
                 Text(
                   "Profile",
                   style: GoogleFonts.poppins(
@@ -44,46 +61,49 @@ class ProfileScreen extends StatelessWidget {
 
                 SizedBox(height: 2.h),
 
-                // ----------------------------------------------------------
-                // 🟣 USER CARD
-                // ----------------------------------------------------------
+                // 🔹 USER CARD
                 _glassContainer(
                   padding: EdgeInsets.all(4.w),
                   child: Row(
                     children: [
-                      // Avatar
-                      Container(
-                        width: 16.w,
-                        height: 16.w,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: AppColors.logoGradient,
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                      // 🔹 Avatar with Edit
+                      GestureDetector(
+                        onTap: () => Get.to(() => const EditProfileScreen()),
+                        child: Container(
+                          width: 16.w,
+                          height: 16.w,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white12,
                           ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "H",
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: 20.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          clipBehavior: Clip.hardEdge,
+                          child:
+                              user != null &&
+                                  user.photoURL != null &&
+                                  user.photoURL!.isNotEmpty
+                              ? Image.network(user.photoURL!, fit: BoxFit.cover)
+                              : Center(
+                                  child: Text(
+                                    avatarLetter,
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontSize: 20.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
                         ),
                       ),
 
                       SizedBox(width: 4.w),
 
-                      // Info
+                      // 🔹 User info
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "John",
+                              displayName,
                               maxLines: 1,
                               style: GoogleFonts.poppins(
                                 fontSize: 18.sp,
@@ -91,7 +111,6 @@ class ProfileScreen extends StatelessWidget {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-
                             SizedBox(height: 0.7.h),
 
                             Row(
@@ -104,8 +123,7 @@ class ProfileScreen extends StatelessWidget {
                                 SizedBox(width: 1.w),
                                 Expanded(
                                   child: Text(
-                                    "john@gmail.com",
-                                    maxLines: 1,
+                                    email,
                                     overflow: TextOverflow.ellipsis,
                                     style: GoogleFonts.poppins(
                                       fontSize: 14.sp,
@@ -115,7 +133,9 @@ class ProfileScreen extends StatelessWidget {
                                 ),
                               ],
                             ),
+
                             SizedBox(height: 0.7.h),
+
                             Row(
                               children: [
                                 Icon(
@@ -124,14 +144,11 @@ class ProfileScreen extends StatelessWidget {
                                   color: Colors.white70,
                                 ),
                                 SizedBox(width: 1.w),
-                                Expanded(
-                                  child: Text(
-                                    "Member since 11/20/2025",
-                                    maxLines: 2,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 14.sp,
-                                      color: Colors.white70,
-                                    ),
+                                Text(
+                                  "Member since $memberSince",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14.sp,
+                                    color: Colors.white70,
                                   ),
                                 ),
                               ],
@@ -145,9 +162,7 @@ class ProfileScreen extends StatelessWidget {
 
                 SizedBox(height: 2.5.h),
 
-                // ----------------------------------------------------------
-                // 🟣 STATS GRID (Responsive)
-                // ----------------------------------------------------------
+                // 🔹 Stats Row 1
                 Row(
                   children: [
                     Expanded(
@@ -172,6 +187,7 @@ class ProfileScreen extends StatelessWidget {
 
                 SizedBox(height: 2.h),
 
+                // 🔹 Stats Row 2
                 Row(
                   children: [
                     Expanded(
@@ -196,9 +212,7 @@ class ProfileScreen extends StatelessWidget {
 
                 SizedBox(height: 3.h),
 
-                // ----------------------------------------------------------
-                // 🟣 ACHIEVEMENTS — Big Glass Container
-                // ----------------------------------------------------------
+                // 🔹 Achievements
                 _glassContainer(
                   padding: EdgeInsets.symmetric(
                     horizontal: 5.w,
@@ -215,39 +229,42 @@ class ProfileScreen extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-
                       SizedBox(height: 2.h),
-
-                      achievementTile(
-                        "🎯",
-                        "First Steps",
-                        "Complete your first puzzle",
+                      SizedBox(
+                        width: 90.w,
+                        height: 60.h,
+                        child: MyMultiplayerGamesScreen(),
                       ),
-                      achievementTile(
-                        "⚡",
-                        "Speed Demon",
-                        "Complete 25-piece puzzle under 2 minutes",
-                      ),
-                      achievementTile(
-                        "🏆",
-                        "Master Solver",
-                        "Complete 50-piece puzzle",
-                      ),
-                      achievementTile("💪", "Dedicated", "Play 10 games"),
+                      // achievementTile(
+                      //   "🎯",
+                      //   "First Steps",
+                      //   "Complete your first puzzle",
+                      // ),
+                      // achievementTile(
+                      //   "⚡",
+                      //   "Speed Demon",
+                      //   "Complete 25-piece puzzle under 2 minutes",
+                      // ),
+                      // achievementTile(
+                      //   "🏆",
+                      //   "Master Solver",
+                      //   "Complete 50-piece puzzle",
+                      // ),
+                      // achievementTile("💪", "Dedicated", "Play 10 games"),
                     ],
                   ),
                 ),
 
                 SizedBox(height: 3.h),
 
-                // ----------------------------------------------------------
-                // 🟥 LOGOUT BUTTON (Responsive height)
-                // ----------------------------------------------------------
+                // 🔥 LOGOUT BUTTON
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () async {
+                    await AuthService.to.logout();
+                    Get.offAll(() => const LoginSignupScreen());
+                  },
                   child: Container(
                     height: 6.h,
-                    width: 100.w,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.90),
                       borderRadius: BorderRadius.circular(18),
@@ -286,7 +303,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   // ----------------------------------------------------------
-  // 🔹 GLASS CONTAINER
+  // 🔹 Glass Container
   // ----------------------------------------------------------
   Widget _glassContainer({required Widget child, EdgeInsets? padding}) {
     return ClipRRect(
@@ -294,7 +311,6 @@ class ProfileScreen extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
-          width: 100.w,
           padding: padding ?? EdgeInsets.all(4.w),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.08),
@@ -311,7 +327,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   // ----------------------------------------------------------
-  // 🔹 STATS CARD (Responsive)
+  // 🔹 Stats Card
   // ----------------------------------------------------------
   Widget _statsCard({
     required IconData icon,
@@ -344,7 +360,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   // ----------------------------------------------------------
-  // 🔹 RESPONSIVE ACHIEVEMENT TILE
+  // 🔹 Achievement Tile
   // ----------------------------------------------------------
   Widget achievementTile(String emoji, String title, String subtitle) {
     return Container(
@@ -358,17 +374,14 @@ class ProfileScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(emoji, style: TextStyle(fontSize: 20.sp)),
-
+          Text(emoji, style: GoogleFonts.poppins(fontSize: 20.sp)),
           SizedBox(width: 4.w),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
                     fontSize: 17.sp,
@@ -376,14 +389,9 @@ class ProfileScreen extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-
                 SizedBox(height: 0.5.h),
-
                 Text(
                   subtitle,
-                  softWrap: true,
-                  maxLines: 2,
-                  overflow: TextOverflow.fade,
                   style: GoogleFonts.poppins(
                     fontSize: 14.sp,
                     color: Colors.white70,

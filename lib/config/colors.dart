@@ -32,9 +32,9 @@ class AppColors {
 
   // Dark deep navy → neon purple → magenta vibe
   static const List<Color> backgroundGradient = [
-    deepNavy,
+    Color(0xFF0D1A3A),
     Color(0xFF2A1660), // deep purple transition
-    neonPurpleBG, // brand purple
+    Color(0xFF5A2EFF), // brand purple
   ];
 
   // ----------------------------------------------------------

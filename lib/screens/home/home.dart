@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:puzzle_app/config/colors.dart';
+import 'package:puzzle_app/screens/home/service.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:puzzle_app/screens/puzzle.dart';
 
@@ -228,16 +229,24 @@ class HomeScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 3.h),
 
-                _gradientButton("25 Pieces - Easy", [
-                  Color(0xFF22C55E),
-                  Color(0xFF16A34A),
-                ]),
+                _gradientButton(
+                  "25 Pieces - Easy",
+                  [Color(0xFF22C55E), Color(0xFF16A34A)],
+                  onTap: () {
+                    Get.to(PuzzleScreen(pieceCount: 25, isMultiplayer: true));
+
+                    // Get.to(MultiplayerMenuScreen());
+                  },
+                ),
                 SizedBox(height: 2.h),
 
-                _gradientButton("49 Pieces - Hard", [
-                  Color(0xFFFF8C00),
-                  Color(0xFFE65100),
-                ]),
+                _gradientButton(
+                  "50 Pieces - Hard",
+                  [Color(0xFFFF8C00), Color(0xFFE65100)],
+                  onTap: () {
+                    Get.to(PuzzleScreen(pieceCount: 50, isMultiplayer: true));
+                  },
+                ),
                 SizedBox(height: 1.h),
               ],
             ),

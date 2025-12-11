@@ -1,60 +1,58 @@
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:puzzle_app/config/colors.dart';
 
-class LeaderboardScreen extends StatefulWidget {
-  const LeaderboardScreen({super.key});
+class MyMultiplayerGamesScreen extends StatefulWidget {
+  const MyMultiplayerGamesScreen({super.key});
 
   @override
-  State<LeaderboardScreen> createState() => _LeaderboardScreenState();
+  State<MyMultiplayerGamesScreen> createState() =>
+      _MyMultiplayerGamesScreenState();
 }
 
-class _LeaderboardScreenState extends State<LeaderboardScreen> {
+class _MyMultiplayerGamesScreenState extends State<MyMultiplayerGamesScreen> {
   int modeIndex = 2; // 0 = Daily, 1 = Weekly, 2 = All Time
   int pieceIndex = 0; // 0 = 9, 1 = 16, 2 = 25, 3 = 50
 
-  Stream<QuerySnapshot> _getLeaderboardStream() {
-    int pieceCount = [9, 16, 25, 50][pieceIndex];
+  String uid = FirebaseAuth.instance.currentUser!.uid;
+
+  // ===============================
+  // FIRESTORE QUERY
+  // ===============================
+  Stream<QuerySnapshot> _getMyGames() {
+    int piece = [25, 50][pieceIndex];
 
     DateTime now = DateTime.now();
     DateTime filterDate;
 
+    Query ref = FirebaseFirestore.instance
+        .collection("multiplayer_games")
+        .where("status", isEqualTo: "finished")
+        .where("pieceCount", isEqualTo: piece);
+
     if (modeIndex == 0) {
-      // ----------- DAILY -----------
       filterDate = DateTime(now.year, now.month, now.day);
-      return FirebaseFirestore.instance
-          .collection("puzzle_results")
-          .where("pieceCount", isEqualTo: pieceCount)
-          .where(
-            "completedAt",
-            isGreaterThanOrEqualTo: filterDate.toIso8601String(),
-          )
-          .orderBy("durationSeconds")
-          .snapshots();
+      ref = ref.where(
+        "createdAt",
+        isGreaterThanOrEqualTo: filterDate.toIso8601String(),
+      );
     } else if (modeIndex == 1) {
-      // ----------- WEEKLY -----------
       filterDate = now.subtract(const Duration(days: 7));
-      return FirebaseFirestore.instance
-          .collection("puzzle_results")
-          .where("pieceCount", isEqualTo: pieceCount)
-          .where(
-            "completedAt",
-            isGreaterThanOrEqualTo: filterDate.toIso8601String(),
-          )
-          .orderBy("durationSeconds")
-          .snapshots();
-    } else {
-      // ----------- ALL TIME -----------
-      return FirebaseFirestore.instance
-          .collection("puzzle_results")
-          .where("pieceCount", isEqualTo: pieceCount)
-          .orderBy("durationSeconds")
-          .snapshots();
+      ref = ref.where(
+        "createdAt",
+        isGreaterThanOrEqualTo: filterDate.toIso8601String(),
+      );
     }
+
+    return ref.orderBy("createdAt", descending: true).snapshots();
   }
+  // ===============================
+  // UI BUILD
+  // ===============================
 
   @override
   Widget build(BuildContext context) {
@@ -77,21 +75,19 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ----------------------------
                 // HEADER
-                // ----------------------------
                 Row(
                   children: [
-                    Icon(
-                      Icons.emoji_events,
-                      size: 24.sp,
-                      color: Colors.yellowAccent,
-                    ),
-                    SizedBox(width: 2.w),
+                    // Icon(
+                    //   Icons.sports_esports,
+                    //   size: 24.sp,
+                    //   color: Colors.yellowAccent,
+                    // ),
+                    // SizedBox(width: 2.w),
                     Text(
-                      "Leaderboard",
+                      "Multiplayer Games",
                       style: GoogleFonts.poppins(
-                        fontSize: 26.sp,
+                        fontSize: 20.sp,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
@@ -101,23 +97,19 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
                 SizedBox(height: 3.h),
 
-                // ----------------------------
-                // TOP FILTERS (Daily/Weekly/All Time)
-                // ----------------------------
+                // TOP FILTERS: DAILY / WEEKLY / ALL TIME
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _topToggle("Daily", 0),
-                    _topToggle("Weekly", 1),
-                    _topToggle("All Time", 2),
+                    _toggleMode("Daily", 0),
+                    _toggleMode("Weekly", 1),
+                    _toggleMode("All Time", 2),
                   ],
                 ),
 
                 SizedBox(height: 2.5.h),
 
-                // ----------------------------
                 // PIECE COUNT TOGGLE
-                // ----------------------------
                 Container(
                   padding: EdgeInsets.all(1.w),
                   decoration: BoxDecoration(
@@ -126,21 +118,17 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   ),
                   child: Row(
                     children: [
-                      _pieceToggle("9 Pieces", 0),
-                      _pieceToggle("16 Pieces", 1),
-                      _pieceToggle("25 Pieces", 2),
-                      _pieceToggle("50 Pieces", 3),
+                      _togglePiece("25 Pieces", 0),
+                      _togglePiece("50 Pieces", 1),
                     ],
                   ),
                 ),
 
                 SizedBox(height: 3.h),
 
-                // ----------------------------
-                // FIRESTORE LEADERBOARD STREAM
-                // ----------------------------
+                // LIST OF GAMES
                 StreamBuilder<QuerySnapshot>(
-                  stream: _getLeaderboardStream(),
+                  stream: _getMyGames(),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const Center(
@@ -153,7 +141,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         child: Padding(
                           padding: EdgeInsets.only(top: 10.h),
                           child: Text(
-                            "No records found!",
+                            "No multiplayer games found!",
+                            textAlign: TextAlign.center,
                             style: GoogleFonts.poppins(
                               color: Colors.white70,
                               fontSize: 18.sp,
@@ -163,30 +152,37 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                       );
                     }
 
-                    List docs = snapshot.data!.docs;
+                    List allGames = snapshot.data!.docs;
+
+                    // 🔥 LOCAL FILTER (hostId == me OR participantId == me)
+                    List myGames = allGames.where((doc) {
+                      final data = doc.data() as Map<String, dynamic>;
+                      return data["hostId"] == uid ||
+                          data["participantId"] == uid;
+                    }).toList();
+
+                    if (myGames.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 10.h),
+                          child: Text(
+                            "No multiplayer games yet!",
+                            style: GoogleFonts.poppins(
+                              color: Colors.white70,
+                              fontSize: 18.sp,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
 
                     return ListView.builder(
-                      itemCount: docs.length,
                       shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        var d = docs[index];
-                        String name = d["userName"] ?? "Player";
-                        int sec = d["durationSeconds"] ?? 0;
-                        String date = DateTime.parse(
-                          d["completedAt"],
-                        ).toString().split(" ")[0];
-
-                        // Convert seconds → m:ss
-                        String time =
-                            "${(sec ~/ 60)}:${(sec % 60).toString().padLeft(2, '0')}";
-
-                        return _leaderboardCard(
-                          rank: index + 1,
-                          name: name,
-                          time: time,
-                          date: date,
-                        );
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: myGames.length,
+                      itemBuilder: (_, i) {
+                        final data = myGames[i].data() as Map<String, dynamic>;
+                        return _gameCard(data);
                       },
                     );
                   },
@@ -201,17 +197,17 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     );
   }
 
-  // ====================================================
-  // TOP TOGGLE BUTTON
-  // ====================================================
-  Widget _topToggle(String label, int index) {
-    bool active = index == modeIndex;
+  // ===============================
+  // TOGGLES
+  // ===============================
 
+  Widget _toggleMode(String label, int index) {
+    bool active = index == modeIndex;
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => modeIndex = index),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 180),
           padding: EdgeInsets.symmetric(vertical: 1.4.h),
           margin: EdgeInsets.symmetric(horizontal: 1.w),
           decoration: BoxDecoration(
@@ -235,17 +231,14 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     );
   }
 
-  // ====================================================
-  // PIECE COUNT TOGGLE
-  // ====================================================
-  Widget _pieceToggle(String label, int index) {
+  Widget _togglePiece(String label, int index) {
     bool active = index == pieceIndex;
 
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => pieceIndex = index),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 180),
           padding: EdgeInsets.symmetric(vertical: 1.5.h),
           decoration: BoxDecoration(
             color: active ? Colors.white : Colors.transparent,
@@ -266,15 +259,24 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     );
   }
 
-  // ====================================================
-  // LEADERBOARD CARD
-  // ====================================================
-  Widget _leaderboardCard({
-    required int rank,
-    required String name,
-    required String time,
-    required String date,
-  }) {
+  // ===============================
+  // GAME CARD (GLASS UI)
+  // ===============================
+
+  Widget _gameCard(Map<String, dynamic> d) {
+    bool iWon = d["winner"] == uid;
+    bool isHost = d["hostId"] == uid;
+
+    String date = d["createdAt"].toString().split("T")[0];
+
+    String myTime = "${d["winnerTime"] ?? '--'}s";
+
+    // String oppTime = isHost
+    //     ? "${d["participantTime"] ?? '--'}s"
+    //     : "${d["hostTime"] ?? '--'}s";
+
+    String opponent = isHost ? d["participantId"] : d["hostId"];
+
     return Container(
       margin: EdgeInsets.only(bottom: 2.2.h),
       child: ClipRRect(
@@ -293,71 +295,75 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             ),
             child: Row(
               children: [
-                Text(
-                  "#$rank",
-                  style: GoogleFonts.poppins(
-                    fontSize: 17.sp,
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                // ----------- LEFT SIDE: WIN or LOSS -----------
+                Text(iWon ? "🏆" : "❌", style: TextStyle(fontSize: 24.sp)),
                 SizedBox(width: 3.w),
 
-                // Avatar (First Letter)
-                Container(
-                  width: 10.w,
-                  height: 10.w,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: AppColors.logoGradient,
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      name.isNotEmpty ? name[0].toUpperCase() : "?",
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 17.sp,
-                      ),
-                    ),
-                  ),
-                ),
-
-                SizedBox(width: 3.w),
-
+                // ----------- CENTER DETAILS -----------
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        iWon ? "You Won!" : "You Lost",
                         style: GoogleFonts.poppins(
                           fontSize: 17.sp,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
                       ),
+
+                      SizedBox(height: 0.4.h),
+
+                      Text(
+                        "Puzzle: ${d["pieceCount"]} pieces",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14.sp,
+                          color: Colors.white70,
+                        ),
+                      ),
+
+                      Text(
+                        "Opponent: $opponent",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14.sp,
+                          color: Colors.white70,
+                        ),
+                      ),
+
+                      Text(
+                        "Role: ${isHost ? "Host" : "Participant"}",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14.sp,
+                          color: Colors.white70,
+                        ),
+                      ),
+
+                      Text(
+                        "Game Code: ${d["code"]}",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14.sp,
+                          color: Colors.white70,
+                        ),
+                      ),
+
                       Text(
                         date,
                         style: GoogleFonts.poppins(
                           fontSize: 14.sp,
-                          color: Colors.white70,
+                          color: Colors.white54,
                         ),
                       ),
                     ],
                   ),
                 ),
 
+                // ----------- RIGHT SIDE: TIMES -----------
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      time,
+                      myTime,
                       style: GoogleFonts.poppins(
                         fontSize: 19.sp,
                         fontWeight: FontWeight.w700,
@@ -365,12 +371,28 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                       ),
                     ),
                     Text(
-                      "Best Time",
+                      "Time",
                       style: GoogleFonts.poppins(
                         fontSize: 14.sp,
                         color: Colors.white70,
                       ),
                     ),
+                    // SizedBox(height: 1.h),
+                    // Text(
+                    //   oppTime,
+                    //   style: GoogleFonts.poppins(
+                    //     fontSize: 17.sp,
+                    //     fontWeight: FontWeight.w600,
+                    //     color: Colors.white70,
+                    //   ),
+                    // ),
+                    // Text(
+                    //   "Opponent",
+                    //   style: GoogleFonts.poppins(
+                    //     fontSize: 13.sp,
+                    //     color: Colors.white54,
+                    //   ),
+                    // ),
                   ],
                 ),
               ],

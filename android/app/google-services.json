@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "983515414454",
+    "project_id": "puzzlepic-e1ed3",
+    "storage_bucket": "puzzlepic-e1ed3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983515414454:android:4a2b84d8328763c1f3cb17",
+        "android_client_info": {
+          "package_name": "com.example.puzzle_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-baFcflgLOlRLNDn3s13CSUhAT99kIlI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

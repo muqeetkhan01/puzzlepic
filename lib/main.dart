@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:puzzle_app/firebase_options.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
-import 'package:puzzle_app/screens/auth/splash.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'services/auth_service.dart';
+import 'screens/auth/splash.dart';
 
-void main() {
-  runApp(
-    ResponsiveSizer(
-      builder: (context, orientation, screenType) {
-        return const PuzzleApp();
-      },
-    ),
-  );
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  Get.put(AuthService()); // MUST be before runApp()
+
+  runApp(const PuzzleApp());
 }
 
 class PuzzleApp extends StatelessWidget {
@@ -30,8 +35,6 @@ class PuzzleApp extends StatelessWidget {
             scaffoldBackgroundColor: const Color(0xFFF9F9F9),
             fontFamily: GoogleFonts.poppins().fontFamily,
           ),
-
-          /// 👉 CHANGE THIS to SplashScreen or Login
           home: const SplashScreen(),
         );
       },

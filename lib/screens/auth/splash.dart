@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:puzzle_app/screens/auth/login.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:puzzle_app/widgets/bottom_nav.dart';
 
-import '../../config/colors.dart';
+import '../../services/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,69 +18,51 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(seconds: 4), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginSignupScreen()),
-      );
+    // 🔥 AUTH STATE LISTENER — handles login/logout automatically
+    ever(AuthService.to.firebaseUser, (user) async {
+      if (user == null) {
+        Get.offAll(() => const LoginSignupScreen());
+      } else {
+        Get.offAll(() => BottomNavScreen(selected: 0));
+      }
+    });
+
+    // Force trigger once at app start
+    final u = AuthService.to.currentUser;
+    Future.delayed(Duration.zero, () {
+      if (u == null) {
+        Get.offAll(() => const LoginSignupScreen());
+      } else {
+        Get.offAll(() => BottomNavScreen(selected: 0));
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ResponsiveSizer(
-        builder: (_, __, ___) {
-          return Container(
-            width: 100.w,
-            height: 100.h,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: AppColors.backgroundGradient,
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+      body: Container(
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset("assets/images/logo.png", height: 140),
+            const SizedBox(height: 20),
+            Text(
+              "PuzzlePic",
+              style: GoogleFonts.poppins(
+                fontSize: 28,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // LOGO
-                ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        height: 20.h,
-                        width: 20.h,
-                        // color: Colors.white,
-                      ),
-                    )
-                    .animate()
-                    .fadeIn(duration: 800.ms)
-                    .scale(begin: const Offset(0.7, 0.7), duration: 800.ms),
-
-                SizedBox(height: 3.h),
-
-                // Text(
-                //   "PuzzlePic",
-                //   style: GoogleFonts.inter(
-                //     color: Colors.white,
-                //     fontWeight: FontWeight.w600,
-                //     fontSize: 22.sp,
-                //   ),
-                // ).animate().fadeIn(duration: 600.ms),
-                SizedBox(height: 1.5.h),
-                Text(
-                  "Sharpen your mind. One puzzle at a time.",
-                  style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.85),
-                    fontWeight: FontWeight.w300,
-                    fontSize: 15.sp,
-                  ),
-                ).animate().fadeIn(duration: 800.ms),
-              ],
+            const SizedBox(height: 10),
+            Text(
+              "Loading...",
+              style: GoogleFonts.poppins(fontSize: 16, color: Colors.white70),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
