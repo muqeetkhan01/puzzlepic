@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -162,77 +163,111 @@ class ProfileScreen extends StatelessWidget {
 
                 SizedBox(height: 2.5.h),
 
-                // 🔹 Stats Row 1
-                Row(
-                  children: [
-                    Expanded(
-                      child: _statsCard(
-                        icon: Icons.extension,
-                        iconColor: Colors.blueAccent,
-                        value: "0",
-                        label: "Games Played",
-                      ),
-                    ),
-                    SizedBox(width: 3.w),
-                    Expanded(
-                      child: _statsCard(
-                        icon: Icons.access_time_filled_rounded,
-                        iconColor: Colors.greenAccent,
-                        value: "0:00",
-                        label: "Total Time",
-                      ),
-                    ),
-                  ],
+                StreamBuilder<DocumentSnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection("users")
+                      .doc(user!.uid)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const SizedBox();
+                    }
+
+                    final data =
+                        snapshot.data!.data() as Map<String, dynamic>? ?? {};
+
+                    final int gamesPlayed = data['gamePlayed'] ?? 0;
+                    final int totalTime = data['totalTime'] ?? 0;
+                    final int? best = data['best'];
+                    int unlockedAchievements = 0;
+                    final int totalWins = data['totalWins'] ?? 0;
+                    if (gamesPlayed >= 1) unlockedAchievements++;
+                    if (gamesPlayed >= 5) unlockedAchievements++;
+                    if (totalWins >= 1) unlockedAchievements++;
+                    if (totalWins >= 10) unlockedAchievements++;
+                    return Column(
+                      children: [
+                        // 🔹 Stats Row 1
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _statsCard(
+                                icon: Icons.extension,
+                                iconColor: Colors.blueAccent,
+                                value: gamesPlayed.toString(),
+                                label: "Games Played",
+                              ),
+                            ),
+                            SizedBox(width: 3.w),
+                            Expanded(
+                              child: _statsCard(
+                                icon: Icons.access_time_filled_rounded,
+                                iconColor: Colors.greenAccent,
+                                value: formatSeconds(totalTime),
+                                label: "Total Time",
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 2.h),
+
+                        // 🔹 Stats Row 2
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _statsCard(
+                                icon: Icons.emoji_events,
+                                iconColor: Colors.yellowAccent,
+                                value: best != null
+                                    ? formatSeconds(best)
+                                    : "--",
+                                label: "Best (Solo)",
+                              ),
+                            ),
+                            SizedBox(width: 3.w),
+                            Expanded(
+                              child: _statsCard(
+                                icon: Icons.military_tech_outlined,
+                                iconColor: Colors.purpleAccent,
+                                value: "$unlockedAchievements/4",
+                                label: "Achievements",
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
                 ),
-
-                SizedBox(height: 2.h),
-
-                // 🔹 Stats Row 2
-                Row(
-                  children: [
-                    Expanded(
-                      child: _statsCard(
-                        icon: Icons.emoji_events,
-                        iconColor: Colors.yellowAccent,
-                        value: "--",
-                        label: "Best (25pc)",
-                      ),
-                    ),
-                    SizedBox(width: 3.w),
-                    Expanded(
-                      child: _statsCard(
-                        icon: Icons.military_tech_outlined,
-                        iconColor: Colors.purpleAccent,
-                        value: "0/4",
-                        label: "Achievements",
-                      ),
-                    ),
-                  ],
-                ),
-
                 SizedBox(height: 3.h),
 
                 // 🔹 Achievements
                 _glassContainer(
                   padding: EdgeInsets.symmetric(
-                    horizontal: 5.w,
+                    // horizontal: 5.w,
                     vertical: 2.5.h,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "Achievements",
-                        style: GoogleFonts.poppins(
-                          fontSize: 20.sp,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      Row(
+                        children: [
+                          SizedBox(width: 5.w),
+                          Text(
+                            "Achievements",
+                            style: GoogleFonts.poppins(
+                              fontSize: 20.sp,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                       SizedBox(height: 2.h),
                       SizedBox(
                         width: 90.w,
-                        height: 60.h,
+                        height: 70.h,
                         child: MyMultiplayerGamesScreen(),
                       ),
                       // achievementTile(
@@ -329,6 +364,13 @@ class ProfileScreen extends StatelessWidget {
   // ----------------------------------------------------------
   // 🔹 Stats Card
   // ----------------------------------------------------------
+
+  String formatSeconds(int seconds) {
+    final minutes = seconds ~/ 60;
+    final remainingSeconds = seconds % 60;
+    return "$minutes:${remainingSeconds.toString().padLeft(2, '0')}";
+  }
+
   Widget _statsCard({
     required IconData icon,
     required Color iconColor,

@@ -1,8 +1,11 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
-import '../config/colors.dart';   // <-- using your AppColors
+import '../config/colors.dart';
+import 'home/policy.dart'; // <-- using your AppColors
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -27,7 +30,6 @@ class SettingsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               /// TITLE
               Row(
                 children: [
@@ -54,23 +56,23 @@ class SettingsScreen extends StatelessWidget {
                   _settingsTile(
                     icon: Icons.info_outline,
                     title: "Privacy Policy",
-                    onTap: () {},
+                    onTap: () {
+                      Get.to(PrivacyPolicyScreen());
+                    },
                   ),
 
-                  SizedBox(height: 1.5.h),
+                  // SizedBox(height: 1.5.h),
 
-                  _settingsTile(
-                    icon: Icons.shield_outlined,
-                    title: "Terms of Service",
-                    onTap: () {},
-                  ),
-
+                  // _settingsTile(
+                  //   icon: Icons.shield_outlined,
+                  //   title: "Terms of Service",
+                  //   onTap: () {
+                  //     Get.to(TermsScreen());
+                  //   },
+                  // ),
                   SizedBox(height: 2.h),
 
-                  _deleteButton(
-                    label: "Clear Game Data",
-                    onTap: () {},
-                  ),
+                  _deleteButton(label: "Clear Game Data", onTap: () {}),
                 ],
               ),
 
@@ -84,7 +86,26 @@ class SettingsScreen extends StatelessWidget {
                   _settingsTile(
                     icon: Icons.help_outline,
                     title: "Help Center",
-                    onTap: () {},
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          backgroundColor: Colors.black,
+                          title: Text(
+                            "Contact Help:",
+                            style: GoogleFonts.poppins(color: Colors.white),
+                          ),
+                          content: Text(
+                            'playpuzzlepics@gmail.com',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 16.sp,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
 
                   SizedBox(height: 2.h),
@@ -145,10 +166,7 @@ class SettingsScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.07),
             borderRadius: BorderRadius.circular(26),
-            border: Border.all(
-              color: AppColors.white20,
-              width: 1,
-            ),
+            border: Border.all(color: AppColors.white20, width: 1),
           ),
 
           child: Column(
@@ -213,10 +231,7 @@ class SettingsScreen extends StatelessWidget {
   }
 
   // ░░ RED CLEAR DATA BUTTON ░░
-  Widget _deleteButton({
-    required String label,
-    required VoidCallback onTap,
-  }) {
+  Widget _deleteButton({required String label, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -237,7 +252,7 @@ class SettingsScreen extends StatelessWidget {
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
               ),
-            )
+            ),
           ],
         ),
       ),

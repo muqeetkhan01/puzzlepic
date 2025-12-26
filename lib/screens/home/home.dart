@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:puzzle_app/config/colors.dart';
 import 'package:puzzle_app/screens/home/service.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';

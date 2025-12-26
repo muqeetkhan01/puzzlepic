@@ -1058,15 +1058,37 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
   Future<void> saveSoloResult() async {
     try {
       final user = FirebaseAuth.instance.currentUser!;
-      FirebaseFirestore.instance.collection("puzzle_results").add({
+      final userRef = FirebaseFirestore.instance
+          .collection("users")
+          .doc(user.uid);
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final snap = await transaction.get(userRef);
+        final data = snap.data() ?? {};
+
+        final int previousBest = data['best'] ?? seconds;
+
+        final int newBest = seconds < previousBest ? seconds : previousBest;
+
+        transaction.set(userRef, {
+          "gamePlayed": FieldValue.increment(1),
+          "totalTime": FieldValue.increment(seconds),
+          "best": newBest,
+        }, SetOptions(merge: true));
+      });
+
+      // 🔹 Save match result (separate collection)
+      await FirebaseFirestore.instance.collection("puzzle_results").add({
         "userId": user.uid,
+        "userName": FirebaseAuth.instance.currentUser?.displayName ?? "Player",
         "pieceCount": widget.pieceCount,
         "durationSeconds": seconds,
-        "completedAt": DateTime.now().toIso8601String(),
+        "completedAt": Timestamp.now(),
       });
-    } catch (_) {}
+    } catch (e) {
+      debugPrint("❌ saveSoloResult error: $e");
+    }
   }
-
   // ======================
   //  MULTIPLAYER WINNER
   // ======================
@@ -1075,39 +1097,56 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
     final uid = FirebaseAuth.instance.currentUser!.uid; // winner
     final now = DateTime.now().toIso8601String();
 
-    // Fetch match data to get host & participant IDs
-    final doc = await FirebaseFirestore.instance
+    final gameRef = FirebaseFirestore.instance
         .collection("multiplayer_games")
-        .doc(widget.code.toString())
-        .get();
+        .doc(widget.code.toString());
 
-    final data = doc.data()!;
-    final hostId = data["hostId"];
-    final participantId = data["participantId"];
+    final gameSnap = await gameRef.get();
+    final data = gameSnap.data()!;
 
-    final loserId = uid == hostId ? participantId : hostId;
+    final String hostId = data["hostId"];
+    final String participantId = data["participantId"];
 
-    // Save full match results
+    final String loserId = uid == hostId ? participantId : hostId;
+
+    final usersRef = FirebaseFirestore.instance.collection("users");
+
+    // 🔥 ATOMIC UPDATE FOR BOTH USERS
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final winnerRef = usersRef.doc(uid);
+      final loserRef = usersRef.doc(loserId);
+
+      transaction.set(winnerRef, {
+        "totalMultiPlayed": FieldValue.increment(1),
+        "totalWins": FieldValue.increment(1),
+      }, SetOptions(merge: true));
+
+      transaction.set(loserRef, {
+        "totalMultiPlayed": FieldValue.increment(1),
+      }, SetOptions(merge: true));
+    });
+
+    // 🔹 Save match result
     await FirebaseFirestore.instance.collection("multiplayer_results").add({
       "code": widget.code,
       "pieceCount": widget.pieceCount,
       "winnerId": uid,
       "loserId": loserId,
       "winnerTime": seconds,
-      "loserTime": null, // will update once loser finishes too
+      "loserTime": null,
       "startedAt": data["createdAt"],
       "finishedAt": now,
     });
 
-    // Update game status (simple version)
-    await FirebaseFirestore.instance
-        .collection("multiplayer_games")
-        .doc(widget.code.toString())
-        .update({"winnerTime": seconds, "winner": uid, "status": "finished"});
+    // 🔹 Update game document
+    await gameRef.update({
+      "winner": uid,
+      "winnerTime": seconds,
+      "status": "finished",
+    });
 
     showMultiplayerPopup(true);
   }
-
   // ======================
   //  POPUP — SOLO
   // ======================
@@ -1155,7 +1194,40 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
                         fontSize: 17.sp,
                       ),
                     ),
+
                     SizedBox(height: 3.h),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                PuzzleScreen(pieceCount: widget.pieceCount),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        height: 6.h,
+                        width: 55.w,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFA855F7), Color(0xFF9333EA)],
+                          ),
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Play again!",
+                            style: GoogleFonts.poppins(
+                              fontSize: 17.sp,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
                     actionBtn("Go Home", () {
                       Navigator.pushReplacement(
                         context,
@@ -1359,9 +1431,18 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
                 )
               : Column(
                   children: [
-                    SizedBox(height: 7.h),
+                    SizedBox(height: 6.h),
                     buildTopBar(),
+                    Text(
+                      "Piecs: ${widget.pieceCount}",
+                      style: GoogleFonts.poppins(
+                        color: Colors.white70,
+                        fontSize: 17.sp,
+                      ),
+                    ),
+                    // Spacer(),
                     Expanded(child: buildPuzzleGrid()),
+                    // Spacer(),
                   ],
                 ),
         ),
@@ -1378,6 +1459,7 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
           style: GoogleFonts.poppins(fontSize: 18.sp, color: AppColors.white),
         ),
         SizedBox(width: 10),
+
         SizedBox(
           height: 3.h,
           width: 3.h,
@@ -1395,32 +1477,46 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
   }
 
   Widget buildPuzzleGrid() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double tileSizeW = (constraints.maxWidth * 0.92) / cols;
-        double tileSizeH = (constraints.maxHeight * 0.92) / rows;
-        double tileSize = tileSizeW < tileSizeH ? tileSizeW : tileSizeH;
+    return Expanded(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Available space AFTER top UI
+          final maxWidth = constraints.maxWidth;
+          final maxHeight = constraints.maxHeight;
 
-        return Center(
-          child: SizedBox(
-            width: tileSize * cols,
-            height: tileSize * rows,
-            child: GridView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: tiles.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: cols,
+          // Calculate tile size from both dimensions
+          final tileSizeFromWidth = maxWidth / cols;
+          final tileSizeFromHeight = maxHeight / rows;
+
+          // Pick the smaller one so grid NEVER overflows
+          final tileSize = tileSizeFromWidth < tileSizeFromHeight
+              ? tileSizeFromWidth
+              : tileSizeFromHeight;
+
+          final gridWidth = tileSize * cols;
+          final gridHeight = tileSize * rows;
+
+          return Center(
+            child: SizedBox(
+              width: gridWidth,
+              height: gridHeight,
+              child: GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                itemCount: tiles.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: cols,
+                ),
+                itemBuilder: (_, index) {
+                  return buildTile(index, tileSize);
+                },
               ),
-              itemBuilder: (_, index) {
-                return buildTile(index, tileSize);
-              },
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
-
   // ======================
   //  TILE INTERACTION
   // ======================

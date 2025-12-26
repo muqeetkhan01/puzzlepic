@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -173,9 +174,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         var d = docs[index];
                         String name = d["userName"] ?? "Player";
                         int sec = d["durationSeconds"] ?? 0;
-                        String date = DateTime.parse(
-                          d["completedAt"],
-                        ).toString().split(" ")[0];
+                        String date = DateFormat(
+                          'dd MMM yyyy',
+                        ).format((d["completedAt"] as Timestamp).toDate());
 
                         // Convert seconds → m:ss
                         String time =

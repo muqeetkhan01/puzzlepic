@@ -87,7 +87,7 @@ class _MyMultiplayerGamesScreenState extends State<MyMultiplayerGamesScreen> {
                     Text(
                       "Multiplayer Games",
                       style: GoogleFonts.poppins(
-                        fontSize: 20.sp,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
@@ -145,7 +145,7 @@ class _MyMultiplayerGamesScreenState extends State<MyMultiplayerGamesScreen> {
                             textAlign: TextAlign.center,
                             style: GoogleFonts.poppins(
                               color: Colors.white70,
-                              fontSize: 18.sp,
+                              fontSize: 15.sp,
                             ),
                           ),
                         ),
@@ -208,7 +208,7 @@ class _MyMultiplayerGamesScreenState extends State<MyMultiplayerGamesScreen> {
         onTap: () => setState(() => modeIndex = index),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          padding: EdgeInsets.symmetric(vertical: 1.4.h),
+          padding: EdgeInsets.symmetric(vertical: .8.h),
           margin: EdgeInsets.symmetric(horizontal: 1.w),
           decoration: BoxDecoration(
             color: active
@@ -222,7 +222,7 @@ class _MyMultiplayerGamesScreenState extends State<MyMultiplayerGamesScreen> {
               style: GoogleFonts.poppins(
                 color: Colors.white.withOpacity(active ? 1 : 0.7),
                 fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-                fontSize: 16.sp,
+                fontSize: 15.sp,
               ),
             ),
           ),
@@ -239,7 +239,7 @@ class _MyMultiplayerGamesScreenState extends State<MyMultiplayerGamesScreen> {
         onTap: () => setState(() => pieceIndex = index),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          padding: EdgeInsets.symmetric(vertical: 1.5.h),
+          padding: EdgeInsets.symmetric(vertical: 1.2.h),
           decoration: BoxDecoration(
             color: active ? Colors.white : Colors.transparent,
             borderRadius: BorderRadius.circular(26.sp),
@@ -323,14 +323,13 @@ class _MyMultiplayerGamesScreenState extends State<MyMultiplayerGamesScreen> {
                         ),
                       ),
 
-                      Text(
-                        "Opponent: $opponent",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14.sp,
-                          color: Colors.white70,
-                        ),
-                      ),
-
+                      // Text(
+                      //   "Opponent: $opponent",
+                      //   style: GoogleFonts.poppins(
+                      //     fontSize: 14.sp,
+                      //     color: Colors.white70,
+                      //   ),
+                      // ),
                       Text(
                         "Role: ${isHost ? "Host" : "Participant"}",
                         style: GoogleFonts.poppins(
