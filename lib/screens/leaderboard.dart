@@ -18,7 +18,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   int pieceIndex = 0; // 0 = 9, 1 = 16, 2 = 25, 3 = 50
 
   Stream<QuerySnapshot> _getLeaderboardStream() {
-    int pieceCount = [9, 16, 25, 50][pieceIndex];
+    int pieceCount = [9, 12, 25, 50][pieceIndex];
 
     DateTime now = DateTime.now();
     DateTime filterDate;
@@ -128,7 +128,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   child: Row(
                     children: [
                       _pieceToggle("9 Pieces", 0),
-                      _pieceToggle("16 Pieces", 1),
+                      _pieceToggle("12 Pieces", 1),
                       _pieceToggle("25 Pieces", 2),
                       _pieceToggle("50 Pieces", 3),
                     ],

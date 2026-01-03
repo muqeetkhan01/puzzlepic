@@ -2,9 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lottie/lottie.dart';
 import 'package:puzzle_app/config/colors.dart';
-import 'package:puzzle_app/screens/home/service.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:puzzle_app/screens/puzzle.dart';
 
@@ -275,21 +273,79 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                /// TITLE
                 Text(
                   "How to Play",
                   style: GoogleFonts.poppins(
-                    fontSize: 20.sp,
+                    fontSize: 21.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.white,
                   ),
                 ),
 
-                SizedBox(height: 2.h),
-                _bullet("Upload your favorite photo"),
-                SizedBox(height: 1.5.h),
-                _bullet("Drag and drop puzzle pieces to swap their positions"),
-                SizedBox(height: 1.5.h),
-                _bullet("Complete the puzzle as fast as possible"),
+                SizedBox(height: 2.2.h),
+
+                /// SOLO MODE
+                Text(
+                  "🎯 Solo Mode",
+                  style: GoogleFonts.poppins(
+                    fontSize: 16.5.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.white,
+                  ),
+                ),
+                SizedBox(height: 0.8.h),
+                _bullet("Upload any photo from your gallery"),
+                _bullet("Puzzle pieces will shuffle automatically"),
+                _bullet("Drag & swap pieces to rebuild the image"),
+                _bullet("Beat your best time and climb the leaderboard"),
+
+                SizedBox(height: 2.2.h),
+
+                /// MULTIPLAYER MODE
+                Text(
+                  "⚔️ Battle Mode",
+                  style: GoogleFonts.poppins(
+                    fontSize: 16.5.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.white,
+                  ),
+                ),
+                SizedBox(height: 0.8.h),
+                _bullet("Play live against friends in real-time", true),
+
+                SizedBox(height: 1.8.h),
+
+                /// HOST
+                Text(
+                  "👑 Host a Game",
+                  style: GoogleFonts.poppins(
+                    fontSize: 15.5.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.white,
+                  ),
+                ),
+                SizedBox(height: 0.6.h),
+                _bullet("Choose and upload the puzzle image"),
+                _bullet("Generate a unique room code"),
+                _bullet("Invite friends and start the match"),
+                _bullet("Fastest player to solve wins"),
+                SizedBox(height: 1.6.h),
+
+                /// PARTICIPANT
+                Text(
+                  "🎮 Join a Game",
+                  style: GoogleFonts.poppins(
+                    fontSize: 15.5.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.white,
+                  ),
+                ),
+                SizedBox(height: 0.6.h),
+                _bullet("Enter the room code shared by the host"),
+                _bullet("Solve the same puzzle as other players"),
+                _bullet("Race in real-time to finish first"),
+                _bullet("Winner earns bragging rights 🏆"),
               ],
             ),
           ),
@@ -298,9 +354,9 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _bullet(String text) {
+  Widget _bullet(String text, [bool isSub = false]) {
     return Text(
-      "•  $text",
+      isSub ? text : "•  $text",
       style: GoogleFonts.poppins(fontSize: 16.sp, color: AppColors.white70),
     );
   }

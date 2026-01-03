@@ -94,9 +94,7 @@ class _MyMultiplayerGamesScreenState extends State<MyMultiplayerGamesScreen> {
                     ),
                   ],
                 ),
-
                 SizedBox(height: 3.h),
-
                 // TOP FILTERS: DAILY / WEEKLY / ALL TIME
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -106,9 +104,7 @@ class _MyMultiplayerGamesScreenState extends State<MyMultiplayerGamesScreen> {
                     _toggleMode("All Time", 2),
                   ],
                 ),
-
                 SizedBox(height: 2.5.h),
-
                 // PIECE COUNT TOGGLE
                 Container(
                   padding: EdgeInsets.all(1.w),
@@ -123,9 +119,7 @@ class _MyMultiplayerGamesScreenState extends State<MyMultiplayerGamesScreen> {
                     ],
                   ),
                 ),
-
                 SizedBox(height: 3.h),
-
                 // LIST OF GAMES
                 StreamBuilder<QuerySnapshot>(
                   stream: _getMyGames(),
@@ -135,7 +129,6 @@ class _MyMultiplayerGamesScreenState extends State<MyMultiplayerGamesScreen> {
                         child: CircularProgressIndicator(color: Colors.white),
                       );
                     }
-
                     if (snapshot.data!.docs.isEmpty) {
                       return Center(
                         child: Padding(
@@ -151,16 +144,13 @@ class _MyMultiplayerGamesScreenState extends State<MyMultiplayerGamesScreen> {
                         ),
                       );
                     }
-
                     List allGames = snapshot.data!.docs;
-
                     // 🔥 LOCAL FILTER (hostId == me OR participantId == me)
                     List myGames = allGames.where((doc) {
                       final data = doc.data() as Map<String, dynamic>;
                       return data["hostId"] == uid ||
                           data["participantId"] == uid;
                     }).toList();
-
                     if (myGames.isEmpty) {
                       return Center(
                         child: Padding(
@@ -175,7 +165,6 @@ class _MyMultiplayerGamesScreenState extends State<MyMultiplayerGamesScreen> {
                         ),
                       );
                     }
-
                     return ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
@@ -187,7 +176,6 @@ class _MyMultiplayerGamesScreenState extends State<MyMultiplayerGamesScreen> {
                     );
                   },
                 ),
-
                 SizedBox(height: 6.h),
               ],
             ),

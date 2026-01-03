@@ -1,8 +1,12 @@
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:puzzle_app/screens/auth/login.dart';
+import 'package:puzzle_app/services/auth_service.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import '../config/colors.dart';
 import 'home/policy.dart'; // <-- using your AppColors
@@ -72,7 +76,55 @@ class SettingsScreen extends StatelessWidget {
                   // ),
                   SizedBox(height: 2.h),
 
-                  _deleteButton(label: "Clear Game Data", onTap: () {}),
+                  _deleteButton(
+                    label: "Delete Account",
+                    onTap: () async {
+                      bool confirmDelete = await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            backgroundColor: Colors.white,
+                            title: const Text("Confirm Account Deletion"),
+                            content: const Text(
+                              "Are you sure you want to delete your account? \n\nThis action cannot be undone.",
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(
+                                    context,
+                                  ).pop(false); // Cancel deletion
+                                },
+                                child: const Text(
+                                  "Cancel",
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(
+                                    context,
+                                  ).pop(true); // Confirm deletion
+                                },
+                                child: const Text(
+                                  "Delete",
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                      if (confirmDelete) {
+                        await FirebaseFirestore.instance
+                            .collection('userProfile')
+                            .doc(FirebaseAuth.instance.currentUser!.uid)
+                            .delete();
+                        await AuthService.to.logout();
+                        Get.offAll(() => const LoginSignupScreen());
+                      }
+                    },
+                  ),
                 ],
               ),
 
