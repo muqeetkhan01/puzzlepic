@@ -1434,7 +1434,7 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
                     SizedBox(height: 6.h),
                     buildTopBar(),
                     Text(
-                      "Piecs: ${widget.pieceCount}",
+                      "Pieces: ${widget.pieceCount}",
                       style: GoogleFonts.poppins(
                         color: Colors.white70,
                         fontSize: 17.sp,
@@ -1477,44 +1477,42 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
   }
 
   Widget buildPuzzleGrid() {
-    return Expanded(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // Available space AFTER top UI
-          final maxWidth = constraints.maxWidth;
-          final maxHeight = constraints.maxHeight;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Available space AFTER top UI
+        final maxWidth = constraints.maxWidth;
+        final maxHeight = constraints.maxHeight;
 
-          // Calculate tile size from both dimensions
-          final tileSizeFromWidth = maxWidth / cols;
-          final tileSizeFromHeight = maxHeight / rows;
+        // Calculate tile size from both dimensions
+        final tileSizeFromWidth = maxWidth / cols;
+        final tileSizeFromHeight = maxHeight / rows;
 
-          // Pick the smaller one so grid NEVER overflows
-          final tileSize = tileSizeFromWidth < tileSizeFromHeight
-              ? tileSizeFromWidth
-              : tileSizeFromHeight;
+        // Pick the smaller one so grid NEVER overflows
+        final tileSize = tileSizeFromWidth < tileSizeFromHeight
+            ? tileSizeFromWidth
+            : tileSizeFromHeight;
 
-          final gridWidth = tileSize * cols;
-          final gridHeight = tileSize * rows;
+        final gridWidth = tileSize * cols;
+        final gridHeight = tileSize * rows;
 
-          return Center(
-            child: SizedBox(
-              width: gridWidth,
-              height: gridHeight,
-              child: GridView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
-                itemCount: tiles.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: cols,
-                ),
-                itemBuilder: (_, index) {
-                  return buildTile(index, tileSize);
-                },
+        return Center(
+          child: SizedBox(
+            width: gridWidth,
+            height: gridHeight,
+            child: GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              itemCount: tiles.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: cols,
               ),
+              itemBuilder: (_, index) {
+                return buildTile(index, tileSize);
+              },
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
   // ======================
