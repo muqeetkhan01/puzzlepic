@@ -1,4 +1,4 @@
-package com.mk.puzzle_app
+package com.puzzle.pic
 
 import io.flutter.embedding.android.FlutterActivity
 
