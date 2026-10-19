@@ -10,6 +10,7 @@ import 'package:puzzle_app/screens/auth/login.dart';
 import 'package:puzzle_app/screens/home/multi_leaderboard.dart';
 import 'package:puzzle_app/services/auth_service.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import '../widgets/gradient_scaffold.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -31,18 +32,18 @@ class ProfileScreen extends StatelessWidget {
       memberSince = "${date.month}/${date.day}/${date.year}";
     }
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(
+    return GradientScaffold(
+      // backgroundColor: Colors.transparent,
+      body: SizedBox(
         width: 100.w,
         height: 100.h,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: AppColors.backgroundGradient,
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+        // decoration: BoxDecoration(
+        //   gradient: LinearGradient(
+        //     colors: AppColors.backgroundGradient,
+        //     begin: Alignment.topCenter,
+        //     end: Alignment.bottomCenter,
+        //   ),
+        // ),
         child: SafeArea(
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),

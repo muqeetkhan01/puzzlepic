@@ -5,26 +5,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:puzzle_app/config/colors.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:puzzle_app/screens/puzzle.dart';
+import '../../widgets/gradient_scaffold.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        width: 100.w,
-        height: 100.h,
-
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: AppColors.backgroundGradient,
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-
-        child: SingleChildScrollView(
+    return GradientScaffold(
+      body: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Column(
             children: [
@@ -94,7 +83,6 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 
@@ -185,8 +173,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
+    ));
   }
 
   // ⭐ MULTIPLAYER

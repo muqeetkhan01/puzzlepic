@@ -12,6 +12,7 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../config/colors.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/bottom_nav.dart';
+import '../../widgets/gradient_scaffold.dart';
 import 'forgot_password_screen.dart';
 
 class LoginSignupScreen extends StatefulWidget {
@@ -107,7 +108,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   // ----------------------------------------------------------
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GradientScaffold(
+      extendBodyBehindAppBar: false,
       body: Container(
         width: 100.w,
         height: 100.h,
@@ -152,8 +154,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
             ),
           ),
         ),
-      ),
-    );
+    ));
   }
 
   // ----------------------------------------------------------

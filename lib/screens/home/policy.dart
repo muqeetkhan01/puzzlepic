@@ -1,47 +1,36 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:puzzle_app/config/colors.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:get/get.dart';
+import '../../widgets/gradient_scaffold.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        width: 100.w,
-        height: 100.h,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: AppColors.backgroundGradient,
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _topBar("Privacy Policy"),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                  child: _glassContainer(
-                    child: Text(
-                      _privacyText,
-                      style: GoogleFonts.poppins(
-                        fontSize: 15.sp,
-                        color: Colors.white70,
-                        height: 1.6,
-                      ),
+    return GradientScaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            _topBar("Privacy Policy"),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                child: _glassContainer(
+                  child: Text(
+                    _privacyText,
+                    style: GoogleFonts.poppins(
+                      fontSize: 15.sp,
+                      color: Colors.white70,
+                      height: 1.6,
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

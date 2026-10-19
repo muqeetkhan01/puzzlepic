@@ -22,6 +22,7 @@ import '../config/colors.dart';
 import 'package:http/http.dart' as http;
 
 import '../config/cloudinary_config.dart';
+import '../widgets/gradient_scaffold.dart';
 // -------------------------------------------------------
 //  PUZZLE SCREEN (Upload Image)
 // -------------------------------------------------------
@@ -437,42 +438,31 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        width: 100.w,
-        height: 100.h,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: AppColors.backgroundGradient,
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 5.w),
-            child: Column(
-              children: [
-                _topBar(),
-                SizedBox(height: 2.h),
-                _header(),
-                SizedBox(height: 3.h),
-                _uploadCard(),
-                SizedBox(height: imageFile != null ? 4.h : 2.h),
+    return GradientScaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 5.w),
+          child: Column(
+            children: [
+              _topBar(),
+              SizedBox(height: 2.h),
+              _header(),
+              SizedBox(height: 3.h),
+              _uploadCard(),
+              SizedBox(height: imageFile != null ? 4.h : 2.h),
 
-                if (!widget.isMultiplayer && imageFile != null)
-                  _soloStartButton(),
+              if (!widget.isMultiplayer && imageFile != null)
+                _soloStartButton(),
 
-                if (widget.isMultiplayer &&
-                    isHost &&
-                    imageFile != null &&
-                    participantId.isNotEmpty)
-                  _hostStartGameButton(),
+              if (widget.isMultiplayer &&
+                  isHost &&
+                  imageFile != null &&
+                  participantId.isNotEmpty)
+                _hostStartGameButton(),
 
-                SizedBox(height: 4.h),
-                _tipsSection(),
-              ],
-            ),
+              SizedBox(height: 4.h),
+              _tipsSection(),
+            ],
           ),
         ),
       ),
@@ -872,35 +862,20 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
   // ======================
   Widget _waitingScreen() {
     return Scaffold(
-      body: Container(
-        width: 100.w,
-        height: 100.h,
-
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: AppColors.backgroundGradient,
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Lottie.asset("assets/animation/waiting.json", height: 400),
-              // SizedBox(height: 10),
-              Text(
-                participantId.isEmpty
-                    ? "Waiting for participant to join..."
-                    : "Participant joined!\nWaiting for host to start...",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontSize: 18.sp,
-                ),
-              ),
-            ],
-          ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Lottie.asset("assets/animation/waiting.json", height: 400),
+            // SizedBox(height: 10),
+            Text(
+              participantId.isEmpty
+                  ? "Waiting for participant to join..."
+                  : "Participant joined!\nWaiting for host to start...",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(color: Colors.white, fontSize: 18.sp),
+            ),
+          ],
         ),
       ),
     );
@@ -1415,37 +1390,26 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
       return _waitingScreen();
     } else {
       return Scaffold(
-        body: Container(
-          width: 100.w,
-          height: 100.h,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: AppColors.backgroundGradient,
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: loading
-              ? const Center(
-                  child: CircularProgressIndicator(color: Colors.white),
-                )
-              : Column(
-                  children: [
-                    SizedBox(height: 6.h),
-                    buildTopBar(),
-                    Text(
-                      "Pieces: ${widget.pieceCount}",
-                      style: GoogleFonts.poppins(
-                        color: Colors.white70,
-                        fontSize: 17.sp,
-                      ),
+        body: loading
+            ? const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              )
+            : Column(
+                children: [
+                  SizedBox(height: 6.h),
+                  buildTopBar(),
+                  Text(
+                    "Piecs: ${widget.pieceCount}",
+                    style: GoogleFonts.poppins(
+                      color: Colors.white70,
+                      fontSize: 17.sp,
                     ),
-                    // Spacer(),
-                    Expanded(child: buildPuzzleGrid()),
-                    // Spacer(),
-                  ],
-                ),
-        ),
+                  ),
+                  // Spacer(),
+                  buildPuzzleGrid(),
+                  // Spacer(),
+                ],
+              ),
       );
     }
   }
@@ -1477,42 +1441,44 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
   }
 
   Widget buildPuzzleGrid() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Available space AFTER top UI
-        final maxWidth = constraints.maxWidth;
-        final maxHeight = constraints.maxHeight;
+    return Expanded(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Available space AFTER top UI
+          final maxWidth = constraints.maxWidth;
+          final maxHeight = constraints.maxHeight;
 
-        // Calculate tile size from both dimensions
-        final tileSizeFromWidth = maxWidth / cols;
-        final tileSizeFromHeight = maxHeight / rows;
+          // Calculate tile size from both dimensions
+          final tileSizeFromWidth = maxWidth / cols;
+          final tileSizeFromHeight = maxHeight / rows;
 
-        // Pick the smaller one so grid NEVER overflows
-        final tileSize = tileSizeFromWidth < tileSizeFromHeight
-            ? tileSizeFromWidth
-            : tileSizeFromHeight;
+          // Pick the smaller one so grid NEVER overflows
+          final tileSize = tileSizeFromWidth < tileSizeFromHeight
+              ? tileSizeFromWidth
+              : tileSizeFromHeight;
 
-        final gridWidth = tileSize * cols;
-        final gridHeight = tileSize * rows;
+          final gridWidth = tileSize * cols;
+          final gridHeight = tileSize * rows;
 
-        return Center(
-          child: SizedBox(
-            width: gridWidth,
-            height: gridHeight,
-            child: GridView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.zero,
-              itemCount: tiles.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: cols,
+          return Center(
+            child: SizedBox(
+              width: gridWidth,
+              height: gridHeight,
+              child: GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                itemCount: tiles.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: cols,
+                ),
+                itemBuilder: (_, index) {
+                  return buildTile(index, tileSize);
+                },
               ),
-              itemBuilder: (_, index) {
-                return buildTile(index, tileSize);
-              },
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
   // ======================

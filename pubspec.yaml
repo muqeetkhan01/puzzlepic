@@ -1,7 +1,7 @@
 name: puzzle_app
 description: "Photo Puzzle App"
 publish_to: "none"
-version: 1.0.0+1
+version: 1.0.1+9
 
 environment:
   sdk: ^3.9.2
@@ -24,6 +24,7 @@ dependencies:
   cloud_firestore: 5.5.0
   firebase_storage:
   intl:
+  shared_preferences:
 
   # Image handling (split, crop, convert)
   image: ^4.1.7

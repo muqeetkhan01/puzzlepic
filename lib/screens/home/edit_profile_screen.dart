@@ -7,6 +7,7 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 
 import '../../config/colors.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/gradient_scaffold.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -69,8 +70,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     final user = AuthService.to.firebaseUser.value;
 
-    return Scaffold(
-      backgroundColor: Colors.black,
+    return GradientScaffold(
+      // backgroundColor: Colors.black,
       // appBar: AppBar(
       //   backgroundColor: Colors.black,
       //   foregroundColor: Colors.white,
@@ -80,11 +81,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         width: 100.w,
         height: 100.h,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: AppColors.backgroundGradient,
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+          // gradient: LinearGradient(
+          //   colors: AppColors.backgroundGradient,
+          //   begin: Alignment.topCenter,
+          //   end: Alignment.bottomCenter,
+          // ),
         ),
         child: Padding(
           padding: EdgeInsets.all(6.w),

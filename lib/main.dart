@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:puzzle_app/firebase_options.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'services/auth_service.dart';
+import 'config/app_theme.dart';
+import 'controllers/theme_controller.dart';
 import 'screens/auth/splash.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   Get.put(AuthService()); // MUST be before runApp()
+
+  final themeController = Get.put(ThemeController());
+  await themeController.load();
 
   runApp(const PuzzleApp());
 }
@@ -25,18 +28,20 @@ class PuzzleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeController = Get.find<ThemeController>();
+
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
-        return GetMaterialApp(
-          title: "PuzzlePic",
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            useMaterial3: false,
-            scaffoldBackgroundColor: const Color(0xFFF9F9F9),
-            fontFamily: GoogleFonts.poppins().fontFamily,
-          ),
-          home: const SplashScreen(),
-        );
+        return Obx(() {
+          return GetMaterialApp(
+            title: "PuzzlePic",
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.light(themeController.style.value),
+            darkTheme: AppTheme.dark(themeController.style.value),
+            themeMode: themeController.themeMode,
+            home: const SplashScreen(),
+          );
+        });
       },
     );
   }
