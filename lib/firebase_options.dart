@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyA-baFcflgLOlRLNDn3s13CSUhAT99kIlI',
-    appId: '1:983515414454:android:4a2b84d8328763c1f3cb17',
+    appId: '1:983515414454:android:210cedc54ef852c0f3cb17',
     messagingSenderId: '983515414454',
     projectId: 'puzzlepic-e1ed3',
     storageBucket: 'puzzlepic-e1ed3.firebasestorage.app',
