@@ -86,6 +86,7 @@ class AuthService extends GetxService {
     String password,
     File? image,
   ) async {
+    lastErrorCode = null;
     try {
       final cred = await _auth.createUserWithEmailAndPassword(
         email: email.trim(),
@@ -113,7 +114,10 @@ class AuthService extends GetxService {
 
       return null;
     } on FirebaseAuthException catch (e) {
-      return e.message;
+      return friendlyAuthError(e);
+    } catch (_) {
+      lastErrorCode = 'unknown';
+      return describe('unknown').message;
     }
   }
 
@@ -121,6 +125,7 @@ class AuthService extends GetxService {
   // LOGIN
   // ----------------------------------------------------------
   Future<String?> login(String email, String password) async {
+    lastErrorCode = null;
     try {
       await _auth.signInWithEmailAndPassword(
         email: email.trim(),
@@ -128,7 +133,10 @@ class AuthService extends GetxService {
       );
       return null;
     } on FirebaseAuthException catch (e) {
-      return e.message;
+      return friendlyAuthError(e);
+    } catch (_) {
+      lastErrorCode = 'unknown';
+      return describe('unknown').message;
     }
   }
 
@@ -136,11 +144,15 @@ class AuthService extends GetxService {
   // RESET PASSWORD
   // ----------------------------------------------------------
   Future<String?> resetPassword(String email) async {
+    lastErrorCode = null;
     try {
       await _auth.sendPasswordResetEmail(email: email.trim());
       return null;
     } on FirebaseAuthException catch (e) {
-      return e.message;
+      return friendlyAuthError(e);
+    } catch (_) {
+      lastErrorCode = 'unknown';
+      return describe('unknown').message;
     }
   }
 
@@ -206,4 +218,76 @@ class AuthService extends GetxService {
   }
 
   bool get isLoggedIn => firebaseUser.value != null;
+
+  // ----------------------------------------------------------
+  // FRIENDLY ERROR MESSAGES
+  // ----------------------------------------------------------
+
+  /// Firebase error code of the last failed auth call (e.g.
+  /// "email-already-in-use"), so screens can offer the right next step.
+  String? lastErrorCode;
+
+  static AuthErrorInfo describe(String? code) {
+    switch (code) {
+      case 'email-already-in-use':
+        return const AuthErrorInfo(
+          "Email already registered",
+          "An account with this email already exists. Log in instead, or sign up with a different email.",
+        );
+      case 'user-not-found':
+      case 'wrong-password':
+      case 'invalid-credential':
+      case 'INVALID_LOGIN_CREDENTIALS':
+        return const AuthErrorInfo(
+          "Couldn't log you in",
+          "Your email or password is incorrect. Try again, reset your password, or create a new account if you're new here.",
+        );
+      case 'invalid-email':
+        return const AuthErrorInfo(
+          "Check your email",
+          "That email address doesn't look right. Please check it, e.g. name@example.com.",
+        );
+      case 'weak-password':
+        return const AuthErrorInfo(
+          "Password too weak",
+          "Please choose a password with at least 6 characters.",
+        );
+      case 'too-many-requests':
+        return const AuthErrorInfo(
+          "Too many attempts",
+          "For your security we've paused sign-in for a few minutes. Please try again shortly, or reset your password.",
+        );
+      case 'network-request-failed':
+        return const AuthErrorInfo(
+          "You're offline",
+          "Please check your internet connection and try again.",
+        );
+      case 'user-disabled':
+        return const AuthErrorInfo(
+          "Account disabled",
+          "This account has been disabled. Contact Playpuzzlepics@gmail.com for help.",
+        );
+      case 'missing-email':
+        return const AuthErrorInfo(
+          "Email needed",
+          "Please enter your email address.",
+        );
+      default:
+        return const AuthErrorInfo(
+          "Something went wrong",
+          "We couldn't complete that right now. Please try again in a moment.",
+        );
+    }
+  }
+
+  String friendlyAuthError(FirebaseAuthException e) {
+    lastErrorCode = e.code;
+    return describe(e.code).message;
+  }
+}
+
+class AuthErrorInfo {
+  final String title;
+  final String message;
+  const AuthErrorInfo(this.title, this.message);
 }

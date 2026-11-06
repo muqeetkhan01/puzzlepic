@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
+import '../../widgets/app_text_field.dart';
 import '../../config/colors.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/gradient_scaffold.dart';
@@ -87,7 +88,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           //   end: Alignment.bottomCenter,
           // ),
         ),
-        child: Padding(
+        child: SingleChildScrollView(
           padding: EdgeInsets.all(6.w),
           child: Column(
             children: [
@@ -147,19 +148,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
               SizedBox(height: 3.h),
 
-              TextField(
-                controller: nameC,
-                style: GoogleFonts.inter(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: "Full Name",
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white38),
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 1.h),
+                  child: Text(
+                    "Full Name",
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
+              ),
+              AppTextField(
+                controller: nameC,
+                hint: "John Doe",
+                icon: Icons.person,
+                keyboardType: TextInputType.name,
+                textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.done,
+                autofillHints: const [AutofillHints.name],
               ),
 
               SizedBox(height: 4.h),
@@ -167,7 +177,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               GestureDetector(
                 onTap: saving ? null : saveProfile,
                 child: Container(
-                  height: 6.h,
+                  padding: EdgeInsets.symmetric(vertical: 1.8.h),
                   width: 100.w,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(

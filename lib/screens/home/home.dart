@@ -6,6 +6,7 @@ import 'package:puzzle_app/config/colors.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:puzzle_app/screens/puzzle.dart';
 import '../../widgets/gradient_scaffold.dart';
+import '../../services/haptics.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -354,7 +355,12 @@ class HomeScreen extends StatelessWidget {
     VoidCallback? onTap,
   }) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: onTap == null
+          ? null
+          : () {
+              Haptics.tap();
+              onTap();
+            },
       child: Container(
         height: 6.2.h,
         width: double.infinity,

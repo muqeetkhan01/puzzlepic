@@ -9,6 +9,7 @@ import 'services/auth_service.dart';
 import 'config/app_theme.dart';
 import 'controllers/theme_controller.dart';
 import 'screens/auth/splash.dart';
+import 'services/haptics.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +17,8 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   Get.put(AuthService()); // MUST be before runApp()
+
+  await Haptics.load();
 
   final themeController = Get.put(ThemeController());
   await themeController.load();

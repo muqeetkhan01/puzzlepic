@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,6 +24,8 @@ import 'package:http/http.dart' as http;
 
 import '../config/cloudinary_config.dart';
 import '../widgets/gradient_scaffold.dart';
+import '../widgets/app_text_field.dart';
+import '../services/haptics.dart';
 // -------------------------------------------------------
 //  PUZZLE SCREEN (Upload Image)
 // -------------------------------------------------------
@@ -273,132 +276,159 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
   }
 
   void _showJoinCodeDialog() {
-    TextEditingController codeCtrl = TextEditingController();
+    final codeCtrl = TextEditingController();
+    String? error;
+    bool checking = false;
 
-    showGeneralDialog(
+    showDialog(
       context: context,
-      barrierDismissible: false,
-      barrierLabel: "",
-      transitionDuration: const Duration(milliseconds: 200),
-      pageBuilder: (_, __, ___) {
-        return SizedBox(
-          width: 80.w,
-          height: 40.h,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            Future<void> join() async {
+              FocusScope.of(dialogContext).unfocus();
+              final entered = codeCtrl.text.trim();
+              if (entered.isEmpty) {
+                Haptics.error();
+                setDialogState(() => error = "Please enter the game code");
+                return;
+              }
 
-          child: Scaffold(
-            backgroundColor: Colors.black,
-            body: Center(
+              setDialogState(() {
+                checking = true;
+                error = null;
+              });
+
+              try {
+                final doc = await FirebaseFirestore.instance
+                    .collection("multiplayer_games")
+                    .doc(entered)
+                    .get();
+
+                if (!doc.exists) {
+                  Haptics.error();
+                  setDialogState(() {
+                    checking = false;
+                    error = "No game found with this code";
+                  });
+                  return;
+                }
+
+                await FirebaseFirestore.instance
+                    .collection("multiplayer_games")
+                    .doc(entered)
+                    .update({
+                  "participantId": FirebaseAuth.instance.currentUser!.uid,
+                });
+              } catch (_) {
+                setDialogState(() {
+                  checking = false;
+                  error = "Couldn't join. Check your connection and try again.";
+                });
+                return;
+              }
+
+              if (!mounted) return;
+              Navigator.of(dialogContext).pop();
+
+              roomId = entered;
+              code = int.parse(entered);
+              multiplayerMode = "join";
+              isHost = false;
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PuzzleGameScreen(
+                    imageFile: File(""), // dummy file
+                    isMultiplayer: true,
+                    pieceCount: widget.pieceCount,
+                    code: code,
+                  ),
+                ),
+              );
+              setState(() {});
+            }
+
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: EdgeInsets.symmetric(horizontal: 8.w),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(28),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                   child: Container(
-                    width: 80.w,
-                    height: 40.h,
                     padding: EdgeInsets.symmetric(
                       vertical: 3.h,
                       horizontal: 5.w,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: const Color(0xFF1C1A4A).withOpacity(0.92),
                       borderRadius: BorderRadius.circular(28),
                       border: Border.all(color: Colors.white.withOpacity(0.2)),
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Enter Game Code",
-                          style: GoogleFonts.poppins(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "Enter Game Code",
+                            style: GoogleFonts.poppins(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-
-                        SizedBox(height: 2.h),
-
-                        Expanded(
-                          child: TextField(
+                          SizedBox(height: 2.h),
+                          AppTextField(
                             controller: codeCtrl,
-                            style: GoogleFonts.poppins(color: Colors.white),
-                            decoration: InputDecoration(
-                              hintText: "12345",
-                              hintStyle: GoogleFonts.poppins(
-                                color: Colors.white54,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white30),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white70),
-                                borderRadius: BorderRadius.circular(14),
+                            hint: "12345",
+                            autofocus: true,
+                            textAlign: TextAlign.center,
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.go,
+                            maxLength: 10,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            errorText: error,
+                            onChanged: (_) {
+                              if (error != null) {
+                                setDialogState(() => error = null);
+                              }
+                            },
+                            onSubmitted: (_) => checking ? null : join(),
+                          ),
+                          SizedBox(height: 3.h),
+                          _dialogButton(
+                            title: checking ? "Joining..." : "Join",
+                            colors: [AppColors.neonPink, AppColors.puzzleRed],
+                            onTap: () {
+                              if (!checking) join();
+                            },
+                          ),
+                          SizedBox(height: 1.h),
+                          TextButton(
+                            onPressed: checking
+                                ? null
+                                : () => Navigator.of(dialogContext).pop(),
+                            child: Text(
+                              "Cancel",
+                              style: GoogleFonts.poppins(
+                                color: Colors.white70,
+                                fontSize: 15.sp,
                               ),
                             ),
                           ),
-                        ),
-
-                        SizedBox(height: 3.h),
-
-                        _dialogButton(
-                          title: "Join",
-                          colors: [AppColors.neonPink, AppColors.puzzleRed],
-                          onTap: () async {
-                            Navigator.pop(context);
-
-                            String entered = codeCtrl.text.trim();
-                            if (entered.isEmpty) {
-                              Get.back();
-                              return;
-                            }
-
-                            final doc = await FirebaseFirestore.instance
-                                .collection("multiplayer_games")
-                                .doc(entered)
-                                .get();
-
-                            if (!doc.exists) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text("Invalid Code")),
-                              );
-                              Get.back();
-                              return;
-                            }
-
-                            roomId = entered;
-                            code = int.parse(entered);
-                            multiplayerMode = "join";
-                            isHost = false;
-
-                            await FirebaseFirestore.instance
-                                .collection("multiplayer_games")
-                                .doc(entered)
-                                .update({
-                                  "participantId":
-                                      FirebaseAuth.instance.currentUser!.uid,
-                                });
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => PuzzleGameScreen(
-                                  imageFile: File(""), // dummy file
-                                  isMultiplayer: true,
-                                  pieceCount: widget.pieceCount,
-                                  code: code,
-                                ),
-                              ),
-                            );
-                            setState(() {});
-                          },
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -410,9 +440,12 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
     required VoidCallback onTap,
   }) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        Haptics.tap();
+        onTap();
+      },
       child: Container(
-        height: 6.h,
+        padding: EdgeInsets.symmetric(vertical: 1.8.h),
         width: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: colors),
@@ -551,6 +584,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
 
               GestureDetector(
                 onTap: () {
+                  Haptics.tap();
                   if (!widget.isMultiplayer) {
                     pickImage();
                   } else if (multiplayerMode == "host") {
@@ -627,6 +661,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
   Widget _soloStartButton() {
     return GestureDetector(
       onTap: () {
+        Haptics.tap();
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -645,6 +680,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
   Widget _hostStartGameButton() {
     return GestureDetector(
       onTap: () async {
+        Haptics.tap();
         await FirebaseFirestore.instance
             .collection("multiplayer_games")
             .doc(code.toString())
@@ -1127,6 +1163,7 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
   // ======================
 
   void showSoloPopup() {
+    Haptics.celebrate();
     showGeneralDialog(
       context: context,
       barrierDismissible: false,
@@ -1226,6 +1263,7 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
   // ======================
 
   void showMultiplayerPopup(bool won) {
+    won ? Haptics.celebrate() : Haptics.error();
     final String motivationalMsg = won
         ? "Brilliant! Your puzzle skills are unmatched! 🔥"
         : "Don't worry! Every puzzle makes you sharper.\nYou're getting better every round! 💪";
@@ -1356,7 +1394,10 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
 
   Widget actionBtn(String label, VoidCallback onTap) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        Haptics.tap();
+        onTap();
+      },
       child: Container(
         height: 6.h,
         width: 40.w,
@@ -1501,6 +1542,7 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
       builder: (_, __, ___) {
         return Draggable<int>(
           data: index,
+          onDragStarted: Haptics.select,
           feedback: SizedBox(
             width: size,
             height: size,
@@ -1548,6 +1590,12 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
     tileOrder[a] = tileOrder[b];
     tileOrder[b] = temp;
 
+    if (tileOrder[a] == a || tileOrder[b] == b) {
+      Haptics.piecePlaced();
+    } else {
+      Haptics.select();
+    }
+
     setState(() {});
 
     // REMOVE LONG DELAY
@@ -1567,6 +1615,7 @@ class _PuzzleGameScreenState extends State<PuzzleGameScreen>
 
   void undoLastMove() {
     if (!canUndo || undoA == null || undoB == null) return;
+    Haptics.select();
 
     final temp = tileOrder[undoA!];
     tileOrder[undoA!] = tileOrder[undoB!];

@@ -10,6 +10,7 @@ import '../screens/auth/login.dart';
 import '../services/auth_service.dart';
 import '../widgets/gradient_scaffold.dart';
 import 'home/policy.dart';
+import '../services/haptics.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -52,6 +53,16 @@ class SettingsScreen extends StatelessWidget {
                       context,
                       value: themeController.style.value,
                       onChanged: (v) => themeController.setStyle(v),
+                    ),
+                  ),
+                  SizedBox(height: 1.h),
+                  Obx(
+                    () => _switchTile(
+                      context,
+                      icon: Icons.vibration,
+                      title: 'Vibration',
+                      value: Haptics.enabled.value,
+                      onChanged: (v) => Haptics.setEnabled(v),
                     ),
                   ),
                 ],

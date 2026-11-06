@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,9 +12,11 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 
 import '../../config/colors.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/app_text_field.dart';
 import '../../widgets/bottom_nav.dart';
 import '../../widgets/gradient_scaffold.dart';
 import 'forgot_password_screen.dart';
+import '../../services/haptics.dart';
 
 class LoginSignupScreen extends StatefulWidget {
   const LoginSignupScreen({super.key});
@@ -30,6 +33,10 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   final passC = TextEditingController();
 
   File? selectedImage;
+
+  String? nameErr;
+  String? emailErr;
+  String? passErr;
   bool loading = false;
 
   bool get safeMounted => mounted;
@@ -55,51 +62,101 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   // ----------------------------------------------------------
   // VALIDATION
   // ----------------------------------------------------------
-  String? validate() {
+  /// Checks the form and shows any problem right under the field.
+  /// Returns true when everything looks good.
+  bool validate() {
     final name = nameC.text.trim();
     final email = emailC.text.trim();
     final pass = passC.text.trim();
+    final emailRegex = RegExp(r"^[\w\.\+-]+@[\w\.-]+\.\w+$");
 
-    if (!isLogin && name.isEmpty) return "Full name required";
-    // if (!isLogin && selectedImage == null) return "Select profile photo";
+    setState(() {
+      nameErr = (!isLogin && name.isEmpty)
+          ? "Please enter your full name"
+          : null;
 
-    if (email.isEmpty) return "Email required";
+      if (email.isEmpty) {
+        emailErr = "Please enter your email address";
+      } else if (!emailRegex.hasMatch(email)) {
+        emailErr =
+            "This doesn't look like a valid email (e.g. name@example.com)";
+      } else {
+        emailErr = null;
+      }
 
-    final regex = RegExp(r"^[\w\.-]+@[\w\.-]+\.\w+$");
-    if (!regex.hasMatch(email)) return "Invalid email";
+      if (pass.isEmpty) {
+        passErr = "Please enter your password";
+      } else if (!isLogin && pass.length < 6) {
+        passErr = "Your password needs at least 6 characters";
+      } else {
+        passErr = null;
+      }
+    });
 
-    if (pass.isEmpty) return "Password required";
-    if (pass.length < 6) return "Password must be 6+ chars";
+    return nameErr == null && emailErr == null && passErr == null;
+  }
 
-    return null;
+  void _switchMode(bool toLogin) {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      isLogin = toLogin;
+      nameErr = emailErr = passErr = null;
+    });
   }
 
   // ----------------------------------------------------------
   // SNACKBAR
   // ----------------------------------------------------------
-  void showSnack(String title, String msg, {bool err = true}) {
+  void showSnack(
+    String title,
+    String msg, {
+    bool err = true,
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
     if (!safeMounted) return;
 
+    Get.closeAllSnackbars();
     Get.snackbar(
       "",
       "",
       titleText: Text(
         title,
         style: GoogleFonts.inter(
-          fontSize: 17.sp,
+          fontSize: 15.sp,
           fontWeight: FontWeight.w700,
           color: Colors.white,
         ),
       ),
       messageText: Text(
         msg,
-        style: GoogleFonts.inter(fontSize: 15.sp, color: Colors.white),
+        style: GoogleFonts.inter(fontSize: 14.sp, color: Colors.white),
       ),
+      mainButton: actionLabel == null
+          ? null
+          : TextButton(
+              onPressed: () {
+                Get.closeCurrentSnackbar();
+                onAction?.call();
+              },
+              child: Text(
+                actionLabel,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  decoration: TextDecoration.underline,
+                  decorationColor: Colors.white,
+                ),
+              ),
+            ),
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: (err ? Colors.red : Colors.green).withOpacity(0.75),
+      backgroundColor: err
+          ? const Color(0xFFD94A5C).withValues(alpha: 0.95)
+          : const Color(0xFF22A45D).withValues(alpha: 0.95),
       borderRadius: 16,
       margin: const EdgeInsets.all(16),
-      duration: const Duration(seconds: 2),
+      duration: Duration(seconds: err ? 5 : 2),
     );
   }
 
@@ -154,7 +211,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
             ),
           ),
         ),
-    ));
+      ),
+    );
   }
 
   // ----------------------------------------------------------
@@ -180,18 +238,65 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
 
               if (!isLogin) _signupPhoto(),
 
-              if (!isLogin) _label("Full Name"),
-              if (!isLogin) _input(Icons.person, "John Doe", controller: nameC),
-
-              SizedBox(height: 1.5.h),
-
-              _label("Email"),
-              _input(Icons.mail, "your@email.com", controller: emailC),
-
-              SizedBox(height: 1.5.h),
-
-              _label("Password"),
-              _input(Icons.lock, "••••••••", controller: passC, isPass: true),
+              AutofillGroup(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (!isLogin) ...[
+                      _label("Full Name"),
+                      AppTextField(
+                        key: const ValueKey("name"),
+                        errorText: nameErr,
+                        onChanged: (_) {
+                          if (nameErr != null) setState(() => nameErr = null);
+                        },
+                        controller: nameC,
+                        hint: "John Doe",
+                        icon: Icons.person,
+                        keyboardType: TextInputType.name,
+                        textCapitalization: TextCapitalization.words,
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const [AutofillHints.name],
+                      ),
+                      SizedBox(height: 2.h),
+                    ],
+                    _label("Email"),
+                    AppTextField(
+                      key: const ValueKey("email"),
+                      errorText: emailErr,
+                      onChanged: (_) {
+                        if (emailErr != null) setState(() => emailErr = null);
+                      },
+                      controller: emailC,
+                      hint: "your@email.com",
+                      icon: Icons.mail,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.email],
+                    ),
+                    SizedBox(height: 2.h),
+                    _label("Password"),
+                    AppTextField(
+                      key: const ValueKey("password"),
+                      errorText: passErr,
+                      onChanged: (_) {
+                        if (passErr != null) setState(() => passErr = null);
+                      },
+                      controller: passC,
+                      hint: "••••••••",
+                      icon: Icons.lock,
+                      isPassword: true,
+                      textInputAction: TextInputAction.done,
+                      autofillHints: [
+                        isLogin
+                            ? AutofillHints.password
+                            : AutofillHints.newPassword,
+                      ],
+                      onSubmitted: (_) => _submit(),
+                    ),
+                  ],
+                ),
+              ),
 
               SizedBox(height: 1.h),
 
@@ -199,7 +304,11 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
-                    onTap: () => Get.to(() => const ForgotPasswordScreen()),
+                    onTap: () => Get.to(
+                      () => ForgotPasswordScreen(
+                        initialEmail: emailC.text.trim(),
+                      ),
+                    ),
                     child: Text(
                       "Forgot Password?",
                       style: GoogleFonts.inter(
@@ -250,7 +359,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
     return GestureDetector(
       onTap: () {
         if (!safeMounted) return;
-        setState(() => isLogin = loginMode);
+        Haptics.select();
+        _switchMode(loginMode);
       },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 1.2.h),
@@ -323,40 +433,83 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
     );
   }
 
-  Widget _input(
-    IconData icon,
-    String hint, {
-    bool isPass = false,
-    TextEditingController? controller,
-  }) {
-    return Container(
-      height: 5.4.h,
-      margin: EdgeInsets.only(bottom: 1.2.h),
-      padding: EdgeInsets.symmetric(horizontal: 4.w),
-      decoration: BoxDecoration(
-        color: AppColors.white10,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.white20),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.white50, size: 17.sp),
-          SizedBox(width: 3.w),
-          Expanded(
-            child: TextField(
-              controller: controller,
-              obscureText: isPass,
-              style: GoogleFonts.inter(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: hint,
-                hintStyle: GoogleFonts.inter(color: AppColors.white40),
-                border: InputBorder.none,
-              ),
-            ),
+  Future<void> _submit() async {
+    FocusScope.of(context).unfocus();
+    if (loading) return;
+
+    if (!validate()) {
+      Haptics.error();
+      return;
+    }
+
+    if (!safeMounted) return;
+    setState(() => loading = true);
+
+    String? error;
+
+    if (isLogin) {
+      error = await AuthService.to.login(emailC.text.trim(), passC.text.trim());
+    } else {
+      error = await AuthService.to.signup(
+        nameC.text.trim(),
+        emailC.text.trim(),
+        passC.text.trim(),
+        selectedImage,
+      );
+    }
+
+    if (!safeMounted) return;
+
+    setState(() => loading = false);
+
+    if (error != null) {
+      Haptics.error();
+      final code = AuthService.to.lastErrorCode;
+      final info = AuthService.describe(code);
+
+      if (code == 'email-already-in-use') {
+        setState(() => emailErr = "This email is already registered");
+        showSnack(
+          info.title,
+          info.message,
+          actionLabel: "Log in",
+          onAction: () => _switchMode(true),
+        );
+      } else if (isLogin &&
+          const [
+            'user-not-found',
+            'wrong-password',
+            'invalid-credential',
+            'INVALID_LOGIN_CREDENTIALS',
+          ].contains(code)) {
+        showSnack(
+          info.title,
+          info.message,
+          actionLabel: "Reset",
+          onAction: () => Get.to(
+            () => ForgotPasswordScreen(initialEmail: emailC.text.trim()),
           ),
-        ],
-      ),
+        );
+      } else {
+        showSnack(info.title, info.message);
+      }
+      return;
+    }
+
+    Haptics.success();
+    TextInput.finishAutofillContext();
+    showSnack(
+      isLogin ? "Welcome back!" : "Account created",
+      isLogin
+          ? "Good to see you again. Let's solve some puzzles!"
+          : "Welcome to Puzzle Pics! Your account is ready.",
+      err: false,
     );
+
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (!safeMounted) return;
+      Get.offAll(() => BottomNavScreen(selected: 0));
+    });
   }
 
   // ----------------------------------------------------------
@@ -364,56 +517,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   // ----------------------------------------------------------
   Widget _actionButton() {
     return GestureDetector(
-      onTap: () async {
-        if (loading) return;
-
-        final validationMsg = validate();
-        if (validationMsg != null) {
-          showSnack("Validation Error", validationMsg);
-          return;
-        }
-
-        if (!safeMounted) return;
-        setState(() => loading = true);
-
-        String? error;
-
-        if (isLogin) {
-          error = await AuthService.to.login(
-            emailC.text.trim(),
-            passC.text.trim(),
-          );
-        } else {
-          error = await AuthService.to.signup(
-            nameC.text.trim(),
-            emailC.text.trim(),
-            passC.text.trim(),
-            selectedImage,
-          );
-        }
-
-        if (!safeMounted) return;
-
-        setState(() => loading = false);
-
-        if (error != null) {
-          showSnack("Authentication Failed", error);
-          return;
-        }
-
-        showSnack(
-          isLogin ? "Login Successful" : "Account Created",
-          "Welcome to PuzzlePic!",
-          err: false,
-        );
-
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (!safeMounted) return;
-          Get.offAll(() => BottomNavScreen(selected: 0));
-        });
-      },
+      onTap: _submit,
       child: Container(
-        height: 5.4.h,
+        padding: EdgeInsets.symmetric(vertical: 1.8.h),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: isLogin

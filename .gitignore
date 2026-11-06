@@ -43,6 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
+/.claude_backup/
 # FVM Version Cache
-.fvm/
+.fvm/.claude_backup/

@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import '../services/haptics.dart';
 
 class GlassBottomNav extends StatelessWidget {
   final int selectedIndex;
@@ -69,7 +70,10 @@ class GlassBottomNav extends StatelessWidget {
     bool active = index == selectedIndex;
 
     return GestureDetector(
-      onTap: () => onItemTap(index),
+      onTap: () {
+        if (index != selectedIndex) Haptics.select();
+        onItemTap(index);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
